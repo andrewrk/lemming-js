@@ -126,6 +126,7 @@ exports.spritesheet = {
     belt_on: {
       delay: 0.05,
       anchor: 'bottomleft',
+      frames: 'belt',
     },
     belt_off: {
       anchor: 'bottomleft',
@@ -156,6 +157,27 @@ exports.spritesheet = {
     gear_bloody: {
       anchor: 'bottomleft',
       frames: ['gear/05.png'],
+    },
+    'credits/bg': {
+      anchor: 'topleft',
+    },
+    'title/bg': {
+      anchor: 'topleft',
+    },
+    'title/title': {
+      anchor: 'topleft',
+    },
+    'title/continue': {
+      anchor: 'topleft',
+    },
+    'title/new_game': {
+      anchor: 'topleft',
+    },
+    'title/arrow': {
+      anchor: 'topleft',
+    },
+    'title/lem': {
+      anchor: 'topleft',
     },
   },
 };
