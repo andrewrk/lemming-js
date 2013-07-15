@@ -1,5 +1,6 @@
 var chem = require('chem');
 var Vec2d = chem.vec2d.Vec2d;
+var euclideanMod = require('./euclidean_mod');
 
 exports.MainMenu = MainMenu;
 function MainMenu(game) {
@@ -57,7 +58,7 @@ MainMenu.prototype.start = function() {
   this.bg_music = new Audio('music/depressing.mp3');
   this.bg_music.loop = true;
   this.bg_music.volume = 0.50;
-  this.bg_msic.play();
+  this.bg_music.play();
 
   // set up handlers
   this.game.engine.on('draw', this.on_draw.bind(this));
@@ -91,10 +92,10 @@ MainMenu.prototype.update = function(dt, dx) {
 MainMenu.prototype.on_key_press = function(button) {
   switch (button) {
     case chem.button.KeyUp:
-      this.arrow_position = (this.arrow_position - 1) % 2;
+      this.arrow_position = euclideanMod(this.arrow_position - 1, 2);
       break;
     case chem.button.KeyDown:
-      this.arrow_position = (this.arrow_position + 1) % 2;
+      this.arrow_position = euclideanMod(this.arrow_position + 1, 2);
       break;
     case chem.button.KeySpace:
     case chem.button.KeyEnter:
