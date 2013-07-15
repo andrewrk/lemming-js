@@ -1,1 +1,4 @@
-// TODO port this file
+var TileSet = require('./tiles').TileSet;
+
+
+// TODO port the rest
