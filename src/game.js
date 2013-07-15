@@ -29,7 +29,7 @@ function Game(engine) {
 Game.prototype.load = function() {
   var levelStr = localStorage.getItem('save_game');
   var level = parseInt(levelStr, 10);
-  if (level >= 0 && level < levels.length) {
+  if (level >= 0) {
     this.current_level = level;
   } else {
     this.current_level = 0;
@@ -71,8 +71,8 @@ Game.prototype.startPlaying = function() {
     // TODO: make sure this is loaded properly
     // because we're passing a string instead of a file descriptor
     this.current_screen = new levelplayer.LevelPlayer(this, this.level_filename);
-    this.current_screen.start();
   }
+  this.current_screen.start();
 };
 
 Game.prototype.start = function(level_filename) {
