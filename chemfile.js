@@ -165,19 +165,19 @@ exports.spritesheet = {
       anchor: 'topleft',
     },
     'title/title': {
-      anchor: 'topleft',
+      anchor: 'bottomleft',
     },
     'title/continue': {
-      anchor: 'topleft',
+      anchor: 'bottomleft',
     },
     'title/new_game': {
-      anchor: 'topleft',
+      anchor: 'bottomleft',
     },
     'title/arrow': {
-      anchor: 'topleft',
+      anchor: 'bottomleft',
     },
     'title/lem': {
-      anchor: 'topleft',
+      anchor: 'bottomleft',
     },
   },
 };

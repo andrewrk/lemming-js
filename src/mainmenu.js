@@ -69,6 +69,7 @@ MainMenu.prototype.start = function() {
 MainMenu.prototype.clear = function() {
   this.game.engine.removeAllListeners();
   this.bg_music.pause();
+  this.bg_music.src = "";
   this.bg_music = null;
 };
 
