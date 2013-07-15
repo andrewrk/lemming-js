@@ -7,6 +7,6 @@
   },
   "dependencies": {
     "chem-cli": "~0.5.1",
-    "chem": "~0.4.4"
+    "chem": "~0.4.5"
   }
 }
