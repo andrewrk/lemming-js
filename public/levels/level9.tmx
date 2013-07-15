@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="200" height="160" tilewidth="16" tileheight="16">
+ <properties>
+  <property name="bg_art" value="factory_bg.jpg"/>
+  <property name="bg_music" value="music/factory.mp3"/>
+  <property name="fg_art" value="factory_fg.png"/>
+ </properties>
+ <tileset firstgid="1" source="tiles.tsx"/>
+ <layer name="Tile Layer 1" width="200" height="160">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAA+3dwW7bQAxF0cKL7gp0mTr9/+8ssjBgqKEkjobDR/EegIsCreMwuo0dW8qPH+jgczN/mcP5HNo0Ktr2gWPsqQ/68GNPfdCHH3vqgz782FMf9OHHnvqgDz/21Ad9+LGnPujDjz31QR9+7KkP+vBjT33Qhx976oM+/NhTH/Thx576oA8/9tQHffixpz7ow4899UEffuypD/rwY0990Icfe+qDPvzYUx/04cee+qAPP/bUB334bXfG9Bkcy/4aMfShLPtrxNCHsteusq/jyKy5ViZ9+LCrPujDj131QR9+7KoP+vBjV33Qhx+76oM+/NhVH/Thx676oA8/dtUHffixqz7ow49d9UEffuyqD/rwY1d90Icfu+qDPvzYVR/04ceu+qAPv689fWTfCSxBH37sqg/68GNXOj4C5h19+LErHSPnkB/N3u3jGLvSQR962JWOiD4eb0MffuxKB33oYVc6ovvYXu8Hx+hDR/Tzj6ueDYc+dCj3kX2c0gdU+8g+RukDXxT7yD4+s4c+dKj1kX1sKgx96FDqI/u4VBn60KHSR/YxqTT0oUOhj+zjUW3oQ0d2H9nHouLQh47MPrKPQ9WhDx1ZfWQfg8pDHzoy+sg+/tSHPnSs7iP72Ksw9KFjZR/Zx92seQTfvrePh+PvdvF70qzqY+Q4Gf131ee1x1nXAOgo4rieNTOv9VDh//uoPiKfA95ddgOrJvtYpY+aso9b+qAPZdnHLX3Qh7Ls45Y+zo/3+Q99XJd93NKH9vePn80n+7ilD+0+Iq4bW2myj1v60O6D6TEjx1e11zv2+sA62cf6qj6uTnZf9JGj2s6z+sge+shRbef0gZWq7Zw+sFK1ndMHVqq2c/qwPU9vEWfRR40524dqI3+y78Ag+qgxnj7eG1E5LlW7PUIf/0/2ax1HfYycE7r3vqRo28/livfeX79vKRJ91Jj3Pn4NzMpzcF/d7fV69G+/m7O3MdPd+lD4vz/iPlztY/s77aw5Y8Z7BUdu2/s5z3C3Pu46Sj/fnfEeIcteu/RxjD7yRfahpuL9zT5Wu/dx9rHa1cdxClR2fhZ9aHie+DvRj31WUNr5GfSh4XW/9lTswzrnsAr6iHXm9cT3+/Xy+GYq9rF9HEgfNSaij9Hrz569nYp9bNFHjVF7fNVFtZ3P6EPhNUT6qKHazvn+gZWq7Zw+sFK1ndMHVqq2c5U+Vj+HUezjmX0HJjh6f7zazo+o9LG6NdU+Kjbyeo3nzPkjajs/csc+lL9/eM7HUDkf6zsj56J8oY8ak9XH6PkY0edgeY2+VkkfNSarj9HzMSLeu3vlXHr6uPcoPv+IfP+Iyjn1ajs/Qh89RJ2/61Vt5/Ths+IaHxFUzr+6Wx8V31sV1cf2NuB3tz7uOmf78PwcU+1nsIroo8ac7cPznFntZ7CK6KPGRPRxh+snRKOPGqP886vn5s8q1/ydQXXnFvrQMvr6RJXnOIo730MfWhReo4ikuPM99KFF4TWKSIo730MfWlZco+TocVrk4zfFne+J7EP5tUXVPqLMuEb8jMd11XbO948eZlzjd8bjumo7r9THzO9H3fpQUW3nlfrg+0d91XZOH1ip2s7pAytV2zl9YKVqO6cPrFRt5/SBlartnD6wUrWd08daK96rHv0xrtw+fdQYq4+jr/2V9yeNXnNw7z6N3ObI5+D5OHv3lz5qzHsfke9NmnF9xNW3Gflx6KPGfH3eke9Jmnl9xNW3ueLjVNG5j9Ui3ru+6nd23uF3g46gD8BGH4CNPgAbfQA2+gBs9AHY6AOw0Qdgow/ARh+AjT4AG30ANvoAbPQB2OgDsNEHYKMPwEYfgI0+ABt9ADb6AGz0AdjoA7DRB2CjD8BGH4CNPgDbZ+MBjmQfo/QBaPoHePeOlQD0AQA=
+  </data>
+ </layer>
+ <layer name="Ladders" width="200" height="160">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAA+3ZuQ3AMAwEQRXg/ut1BRsI8EMIMxUwuI24FgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwHmuvw+AwfQBTR/Q9AFNH9D0AU0f0PQBTR/Q9AFNH9D0AU0f0PQBTR/Q9AFNH9D0AQAAAAAAAAD7/Nuh6QOaPqDpA5o+oOkDmj6g6QPaU33ojBPpA5o+oE3rQ2dMMm3X+mCSabvWB5NM27U+OJE+oOkDmj6g6QPepw9o+oCmD2j6gG9pDpo+oOkDmj6g6QOaPqDpA5o+oOkDmj6g6QMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA2HUDi3m4/wD0AQA=
+  </data>
+ </layer>
+ <objectgroup name="Object Layer 1" width="200" height="160">
+  <object name="start" type="StartPoint" x="144" y="1984" width="32" height="64"/>
+  <object name="trap door" type="TrapDoor" x="256" y="1056" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="open"/>
+   </properties>
+  </object>
+  <object type="Button" gid="14" x="240" y="1056">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="delay" value="2"/>
+    <property name="down_img" value="button_down.png"/>
+    <property name="up_img" value="button_up.png"/>
+   </properties>
+  </object>
+  <object name="gear" type="GearButton" x="1904" y="720" width="48" height="48">
+   <properties>
+    <property name="button_id" value="bombs"/>
+   </properties>
+  </object>
+  <object name="gun man" type="Agent" x="656" y="624" width="32" height="64">
+   <properties>
+    <property name="type" value="gunner"/>
+   </properties>
+  </object>
+  <object name="monster" type="Agent" x="1168" y="624" width="64" height="64">
+   <properties>
+    <property name="direction" value="-1"/>
+    <property name="type" value="monster"/>
+   </properties>
+  </object>
+  <object name="sign" type="Decoration" x="2944" y="1712" width="80" height="32">
+   <properties>
+    <property name="img" value="winnar.png"/>
+   </properties>
+  </object>
+  <object name="win!" type="Victory" x="2944" y="1680" width="80" height="64"/>
+  <object name="tank" type="Agent" x="416" y="640" width="64" height="48">
+   <properties>
+    <property name="type" value="tank"/>
+   </properties>
+  </object>
+  <object name="bomb spawner" type="BombSpawner" x="276" y="706" width="955" height="69">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="delay" value="0.2"/>
+    <property name="fuse_max" value="4"/>
+    <property name="fuse_min" value="2"/>
+    <property name="state" value="off"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="320" y="1056" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="open"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="448" y="1056" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="open"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="384" y="1056" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="open"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="576" y="1056" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="open"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="640" y="1056" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="open"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="704" y="1056" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="open"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="512" y="1056" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="open"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="832" y="1056" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="open"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="1024" y="1056" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="open"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="896" y="1056" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="open"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="960" y="1056" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="open"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="768" y="1056" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="open"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="272" y="688" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="closed"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="336" y="688" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="closed"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="464" y="688" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="closed"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="400" y="688" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="closed"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="720" y="688" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="closed"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="656" y="688" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="closed"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="592" y="688" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="closed"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="528" y="688" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="closed"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="1104" y="688" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="closed"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="976" y="688" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="closed"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="912" y="688" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="closed"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="848" y="688" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="closed"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="1040" y="688" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="closed"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="1168" y="688" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="closed"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="784" y="688" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="closed"/>
+   </properties>
+  </object>
+  <object name="gun man" type="Agent" x="560" y="624" width="32" height="64">
+   <properties>
+    <property name="type" value="gunner"/>
+   </properties>
+  </object>
+  <object name="gun man" type="Agent" x="864" y="624" width="32" height="64">
+   <properties>
+    <property name="type" value="gunner"/>
+   </properties>
+  </object>
+  <object name="tank" type="Agent" x="736" y="640" width="64" height="48">
+   <properties>
+    <property name="type" value="tank"/>
+   </properties>
+  </object>
+  <object name="gun man" type="Agent" x="976" y="624" width="32" height="64">
+   <properties>
+    <property name="type" value="gunner"/>
+   </properties>
+  </object>
+  <object name="gun man" type="Agent" x="1104" y="624" width="32" height="64">
+   <properties>
+    <property name="type" value="gunner"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="1088" y="1056" width="64" height="16">
+   <properties>
+    <property name="button_id" value="helper"/>
+    <property name="direction" value="1"/>
+    <property name="state" value="off"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="1152" y="1056" width="64" height="16">
+   <properties>
+    <property name="button_id" value="helper"/>
+    <property name="direction" value="1"/>
+    <property name="state" value="off"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="1216" y="1056" width="64" height="16">
+   <properties>
+    <property name="button_id" value="helper"/>
+    <property name="direction" value="1"/>
+    <property name="state" value="off"/>
+   </properties>
+  </object>
+  <object type="Button" gid="14" x="1504" y="1040">
+   <properties>
+    <property name="button_id" value="helper"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="208" y="688" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="closed"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="144" y="688" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="closed"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="80" y="688" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="closed"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="16" y="688" width="64" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="closed"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="544" y="1488" width="64" height="16">
+   <properties>
+    <property name="button_id" value="none"/>
+    <property name="direction" value="1"/>
+    <property name="state" value="on"/>
+   </properties>
+  </object>
+  <object name="monster" type="Agent" x="1424" y="1392" width="64" height="64">
+   <properties>
+    <property name="direction" value="-1"/>
+    <property name="throw_vel_x" value="-1500"/>
+    <property name="throw_vel_y" value="1000"/>
+    <property name="type" value="monster"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="1088" y="1360" width="64" height="16">
+   <properties>
+    <property name="button_id" value="none"/>
+    <property name="direction" value="1"/>
+    <property name="state" value="on"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="1152" y="1360" width="64" height="16">
+   <properties>
+    <property name="button_id" value="none"/>
+    <property name="direction" value="1"/>
+    <property name="state" value="on"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="544" y="1360" width="64" height="16">
+   <properties>
+    <property name="button_id" value="none"/>
+    <property name="direction" value="1"/>
+    <property name="state" value="on"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="608" y="1360" width="64" height="16">
+   <properties>
+    <property name="button_id" value="none"/>
+    <property name="direction" value="1"/>
+    <property name="state" value="on"/>
+   </properties>
+  </object>
+  <object name="bomb spawner" type="BombSpawner" x="2202" y="463" width="967" height="70">
+   <properties>
+    <property name="button_id" value="bomb_room"/>
+    <property name="delay" value="0.1"/>
+    <property name="fuse_max" value="5"/>
+    <property name="fuse_min" value="3"/>
+    <property name="state" value="off"/>
+   </properties>
+  </object>
+  <object type="Button" gid="14" x="2192" y="1056">
+   <properties>
+    <property name="button_id" value="bomb_room"/>
+    <property name="delay" value="2"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup name="PlayerLayer" width="200" height="160" visible="0"/>
+</map>

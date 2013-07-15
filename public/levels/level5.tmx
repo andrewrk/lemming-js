@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="240" height="100" tilewidth="16" tileheight="16">
+ <properties>
+  <property name="bg_art" value="background.png"/>
+  <property name="bg_music" value="music/silly.mp3"/>
+  <property name="fg_art" value="hill.png"/>
+ </properties>
+ <tileset firstgid="1" source="tiles.tsx"/>
+ <layer name="Tiles" width="240" height="100">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAA+3d7WoTURSG0SqoN6CU3v+NShExlqHzkZnZ591nLdh/JFKbfR5ik0z68gKM6tvKAOPSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+TSL+Ra6/dH8XDc0fvRXnKs9Vs9HPf6MHvYS47qPp2T6+i3v617+rnhtvodi377O7qnu3rmOP32d9aeruqZ4/Tb31V7OqtnjtNvf3fs6ZmWOU6//d29p70tc5x+j3m78e8+87XeVe9prWeO0+8f1e9BunJG29PHnjlOv/2Nuqe/HXOcfvuzp77025899aXf/uypL/32Z0996bc/e7rWW+Hot7+1PVVfp7/1ts9+/deTpvr1wL337xL95tiyq9Hmiu/jrH6r75szetNvjupztTa/FmbJ0u32zFn9Pvvv+Dj65TPVfTonn6u4jsteclT36ZysO6PhPewlR3Wfzsk2zza8h73kqO7TOdnuruuo7SVHdZ/OyT7vDR95HmyPO/ay9zUtllX3qd/7fV35M3vJUd2nc1JrqWV7yVHdp3MyBo+/mar7dE7ut/SY+8heclT36ZyMx15yVPfpnPzz7GcR3vWZaOl76fTcd3Wfnc/Jo8c2v7zUfBahvfRT3WfXc/JZo9X36cx76ab6HKSek7XH0Or7bda9zGZtT2dfD3fl+4austRqdT/VwxjsyWOpfnPNsqfuP4/qd06z7Kn6vHcbxjDLnqp/ju82o+j0Wu4Rs/TL/458thfj0e+c9NuDfuek38+l/L9cv3PSbw/6nZN+e9DvnPTbg37npN8e9Dsn/fag3zxbrvNfu83I/aY89zsC/Y6r+neOXvG7STmXfsdV/R7nrUMduxlXdZf6HZ/djKu6S/2Oz27GVX2NUdq1SDPSL+TSL+TSL53M9pqXfiGXfiGXfiGXfiGXfiHXWr/fjTHDzlq/vwEzDLNDAHcBAA==
+  </data>
+ </layer>
+ <layer name="Ladders" width="240" height="100">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAA+3TQQ0AIBDAsBOAf714gAcZaRXssxkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuLdeBwDH/Atd/oUu/0KXf6HLv9DlX+jyLwAAAAAAAAAAAAAAAAAAAAAAAAAAAPxjA2KajL0AdwEA
+  </data>
+ </layer>
+ <objectgroup name="Objects" width="240" height="100">
+  <object name="start" type="StartPoint" x="320" y="816" width="32" height="64"/>
+  <object type="Button" gid="14" x="512" y="880">
+   <properties>
+    <property name="button_id" value="beginning"/>
+    <property name="delay" value="999999"/>
+   </properties>
+  </object>
+  <object name="bridge" type="Bridge" x="416" y="800" width="96" height="96">
+   <properties>
+    <property name="button_id" value="beginning"/>
+    <property name="state" value="down"/>
+   </properties>
+  </object>
+  <object name="sign post" type="Decoration" x="3584" y="720" width="80" height="32">
+   <properties>
+    <property name="img" value="winnar.png"/>
+   </properties>
+  </object>
+  <object name="victory" type="Victory" x="3584" y="656" width="80" height="96"/>
+  <object name="monster" type="Agent" x="512" y="432" width="48" height="48">
+   <properties>
+    <property name="type" value="monster"/>
+   </properties>
+  </object>
+  <object name="bridge" type="Bridge" x="512" y="400" width="96" height="96">
+   <properties>
+    <property name="button_id" value="beginning"/>
+    <property name="state" value="down"/>
+   </properties>
+  </object>
+  <object name="bridge" type="Bridge" x="608" y="400" width="96" height="96">
+   <properties>
+    <property name="button_id" value="beginning"/>
+    <property name="state" value="down"/>
+   </properties>
+  </object>
+  <object name="monster" type="Agent" x="608" y="432" width="48" height="48">
+   <properties>
+    <property name="throw_vel_x" value="600"/>
+    <property name="throw_vel_y" value="1800"/>
+    <property name="type" value="monster"/>
+   </properties>
+  </object>
+  <object name="bridge" type="Bridge" x="800" y="400" width="96" height="96">
+   <properties>
+    <property name="button_id" value="beginning"/>
+    <property name="state" value="down"/>
+   </properties>
+  </object>
+  <object name="bridge" type="Bridge" x="704" y="400" width="96" height="96">
+   <properties>
+    <property name="button_id" value="beginning"/>
+    <property name="state" value="down"/>
+   </properties>
+  </object>
+  <object name="monster" type="Agent" x="800" y="432" width="48" height="48">
+   <properties>
+    <property name="type" value="monster"/>
+   </properties>
+  </object>
+  <object name="monster" type="Agent" x="704" y="432" width="48" height="48">
+   <properties>
+    <property name="type" value="monster"/>
+   </properties>
+  </object>
+  <object name="bridge" type="Bridge" x="1616" y="1008" width="96" height="96">
+   <properties>
+    <property name="button_id" value="bonus"/>
+    <property name="state" value="up"/>
+   </properties>
+  </object>
+  <object type="Button" gid="14" x="1984" y="1088">
+   <properties>
+    <property name="button_id" value="bonus"/>
+   </properties>
+  </object>
+  <object name="monster" type="Agent" x="2144" y="1328" width="48" height="48">
+   <properties>
+    <property name="direction" value="-1"/>
+    <property name="throw_vel_x" value="600"/>
+    <property name="throw_vel_y" value="300"/>
+    <property name="type" value="monster"/>
+   </properties>
+  </object>
+  <object name="monster" type="Agent" x="2656" y="1168" width="48" height="48">
+   <properties>
+    <property name="throw_vel_x" value="600"/>
+    <property name="throw_vel_y" value="180"/>
+    <property name="type" value="monster"/>
+   </properties>
+  </object>
+  <object name="monster" type="Agent" x="3008" y="1216" width="48" height="48">
+   <properties>
+    <property name="direction" value="-1"/>
+    <property name="throw_vel_x" value="-500"/>
+    <property name="throw_vel_y" value="-600"/>
+    <property name="type" value="monster"/>
+   </properties>
+  </object>
+  <object name="monster" type="Agent" x="2752" y="1440" width="48" height="48">
+   <properties>
+    <property name="throw_vel_x" value="-600"/>
+    <property name="throw_vel_y" value="600"/>
+    <property name="type" value="monster"/>
+   </properties>
+  </object>
+  <object name="monster" type="Agent" x="2496" y="1312" width="48" height="48">
+   <properties>
+    <property name="throw_vel_x" value="600"/>
+    <property name="throw_vel_y" value="700"/>
+    <property name="type" value="monster"/>
+   </properties>
+  </object>
+  <object name="monster" type="Agent" x="2880" y="1040" width="48" height="48">
+   <properties>
+    <property name="throw_vel_x" value="-500"/>
+    <property name="throw_vel_y" value="500"/>
+    <property name="type" value="monster"/>
+   </properties>
+  </object>
+  <object name="monster" type="Agent" x="2384" y="944" width="48" height="48">
+   <properties>
+    <property name="throw_vel_x" value="600"/>
+    <property name="throw_vel_y" value="700"/>
+    <property name="type" value="monster"/>
+   </properties>
+  </object>
+  <object name="monster" type="Agent" x="1488" y="1056" width="48" height="48">
+   <properties>
+    <property name="direction" value="-1"/>
+    <property name="throw_vel_x" value="-1200"/>
+    <property name="throw_vel_y" value="300"/>
+    <property name="type" value="monster"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup name="PlayerLayer" width="240" height="100"/>
+</map>

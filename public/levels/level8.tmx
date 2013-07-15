@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="200" height="100" tilewidth="16" tileheight="16">
+ <properties>
+  <property name="bg_art" value="factory_bg.jpg"/>
+  <property name="bg_music" value="music/factory.mp3"/>
+  <property name="fg_art" value="factory_fg.png"/>
+ </properties>
+ <tileset firstgid="1" source="tiles.tsx"/>
+ <layer name="Tile Layer 1" width="200" height="100">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAA+3dTWobQRSFUY0yyAqSOPtfZxBEIITKUrX7db3bPgeKzOSY25/8o7b9cblcPpxDDnnsVk8fuexWTx+57FZPH7nsVk8fuexWTx+57FZPH7nsVk8fuexWTx+57FZPH7nsVk8fuexWTx+57FZPH7nsVk8fuexWTx+57FZPH7nsVk8fuexWTx+57FZPH7nsVk8fuexWTx+57FZPH7nsVk8fuexWTx+57FZPH7nsVk8fuexWTx+57FZPH7nsVk8fuexWTx+57FZPH7nsVk8fuexWTx+57FZPH7nsVk8fuexWTx+57FZPH7nsVk8fuexWTx+57FZPH7l+TZw9HmPLSaePXO/8XftX+848xpaT7izvx3f0d+Ls8RiP576D2bebQh+5Vu92po8TI2d//85s9W76oLPVu+3Zx+//53L3bwf6yLV6t6/2kfB9L33kWr3b1j5efc/r547/x6/SR67Vu23p41UXndq40keu225/npyj3v799fP49cOzryNGTXTr4kYfua67PWvjqEbur/N3X0/v/LHiGX3ketVHdSdbX1NP6OJGH7k++/zqiE7eef388SS1caWPXDOf11Tcw+j1QTqbed6uPmelj1x2+5p3XqfXRy67bffu55b6yGW3sb1+TkUfuew2pg/sNqYP7DamD+w2pg/sNjbbx4/B0Ucuu41tvTds9uMLfc3sNnp+POvRBzO77X29fLdDHn3og7GZ3SrvTXx2Pa2+X9L9l3R5XvN8S0ddrkN90FGX61AfdNTlOtQHHXW5DvVBR9fr8KjfdfUZfdDRrY/VjeiDju77WNmIPujosY9VjeiDjvQBY8/6WNGJPujoeh1W/33mmd85rQ86WX1Pq/td6Wz1Pa3udwUAAAAAAAAAAAAAAAAA4Ej/AJftcUWAOAEA
+  </data>
+ </layer>
+ <layer name="Ladders" width="200" height="100">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAA+3TQQ0AIBDAsBOAf70o2JNASKtgn80AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC/WrcD4GH+gOYPaP6A5g9o/oDmD2j+gOYPaP4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4IQN2i2XEIA4AQA=
+  </data>
+ </layer>
+ <objectgroup name="Object Layer 1" width="200" height="100">
+  <object name="start" type="StartPoint" x="464" y="576" width="32" height="64"/>
+  <object name="gun man" type="Agent" x="1319" y="558" width="32" height="64">
+   <properties>
+    <property name="type" value="gunner"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="1360" y="639" width="64" height="16">
+   <properties>
+    <property name="button_id" value="onwards"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="closed"/>
+   </properties>
+  </object>
+  <object type="Button" gid="14" x="160" y="639">
+   <properties>
+    <property name="button_id" value="bridge"/>
+    <property name="delay" value="2"/>
+   </properties>
+  </object>
+  <object name="bomb spawner" type="BombSpawner" x="272" y="342" width="80" height="24">
+   <properties>
+    <property name="button_id" value="reward"/>
+    <property name="delay" value="1"/>
+    <property name="fuse_max" value="2"/>
+    <property name="fuse_min" value="2"/>
+    <property name="state" value="off"/>
+   </properties>
+  </object>
+  <object name="tank" type="Agent" x="448" y="800" width="64" height="48">
+   <properties>
+    <property name="direction_lock" value="-1"/>
+    <property name="type" value="tank"/>
+   </properties>
+  </object>
+  <object name="monster" type="Agent" x="192" y="143" width="64" height="64">
+   <properties>
+    <property name="direction" value="1"/>
+    <property name="throw_vel_x" value="100"/>
+    <property name="throw_vel_y" value="800"/>
+    <property name="type" value="monster"/>
+   </properties>
+  </object>
+  <object name="sign" type="Decoration" x="464" y="1232" width="80" height="32">
+   <properties>
+    <property name="img" value="winnar.png"/>
+   </properties>
+  </object>
+  <object name="win!" type="Victory" x="464" y="1184" width="80" height="80"/>
+  <object name="belt" type="ConveyorBelt" x="656" y="639" width="64" height="16">
+   <properties>
+    <property name="button_id" value="belt"/>
+    <property name="direction" value="-1"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="720" y="639" width="64" height="16">
+   <properties>
+    <property name="button_id" value="belt"/>
+    <property name="direction" value="-1"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="784" y="639" width="64" height="16">
+   <properties>
+    <property name="button_id" value="belt"/>
+    <property name="direction" value="-1"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="848" y="639" width="64" height="16">
+   <properties>
+    <property name="button_id" value="belt"/>
+    <property name="direction" value="-1"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="912" y="639" width="64" height="16">
+   <properties>
+    <property name="button_id" value="belt"/>
+    <property name="direction" value="-1"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="976" y="639" width="64" height="16">
+   <properties>
+    <property name="button_id" value="belt"/>
+    <property name="direction" value="-1"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="1040" y="639" width="64" height="16">
+   <properties>
+    <property name="button_id" value="belt"/>
+    <property name="direction" value="-1"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="1104" y="639" width="64" height="16">
+   <properties>
+    <property name="button_id" value="belt"/>
+    <property name="direction" value="-1"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="1168" y="639" width="64" height="16">
+   <properties>
+    <property name="button_id" value="belt"/>
+    <property name="direction" value="-1"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="1232" y="639" width="64" height="16">
+   <properties>
+    <property name="button_id" value="belt"/>
+    <property name="direction" value="-1"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="1296" y="639" width="64" height="16">
+   <properties>
+    <property name="button_id" value="belt"/>
+    <property name="direction" value="-1"/>
+   </properties>
+  </object>
+  <object name="gun man" type="Agent" x="1195" y="322" width="32" height="64">
+   <properties>
+    <property name="type" value="gunner"/>
+   </properties>
+  </object>
+  <object name="gun man" type="Agent" x="1044" y="59" width="32" height="64">
+   <properties>
+    <property name="type" value="gunner"/>
+   </properties>
+  </object>
+  <object name="gun man" type="Agent" x="1263" y="386" width="32" height="64">
+   <properties>
+    <property name="type" value="gunner"/>
+   </properties>
+  </object>
+  <object name="gun man" type="Agent" x="1138" y="187" width="32" height="64">
+   <properties>
+    <property name="type" value="gunner"/>
+   </properties>
+  </object>
+  <object name="gun man" type="Agent" x="929" y="48" width="32" height="64">
+   <properties>
+    <property name="type" value="gunner"/>
+   </properties>
+  </object>
+  <object name="bridge" type="Bridge" x="176" y="559" width="96" height="96">
+   <properties>
+    <property name="button_id" value="bridge"/>
+    <property name="state" value="down"/>
+   </properties>
+  </object>
+  <object type="Button" gid="14" x="16" y="639">
+   <properties>
+    <property name="button_id" value="reward"/>
+    <property name="delay" value="2"/>
+   </properties>
+  </object>
+  <object name="bridge" type="Bridge" x="320" y="768" width="96" height="96">
+   <properties>
+    <property name="button_id" value="bridge"/>
+    <property name="state" value="up"/>
+   </properties>
+  </object>
+  <object name="gear" type="GearButton" x="608" y="527" width="48" height="48">
+   <properties>
+    <property name="button_id" value="belt"/>
+   </properties>
+  </object>
+  <object type="Button" gid="14" x="16" y="848">
+   <properties>
+    <property name="button_id" value="onwards"/>
+    <property name="delay" value="2"/>
+   </properties>
+  </object>
+  <object name="trap door" type="TrapDoor" x="192" y="207" width="64" height="16">
+   <properties>
+    <property name="button_id" value="onwards"/>
+    <property name="img" value="factory_door.png"/>
+    <property name="state" value="closed"/>
+   </properties>
+  </object>
+  <object type="Button" gid="14" x="896" y="736">
+   <properties>
+    <property name="button_id" value="belt2"/>
+    <property name="delay" value="2"/>
+   </properties>
+  </object>
+  <object name="tank" type="Agent" x="656" y="752" width="64" height="48">
+   <properties>
+    <property name="direction_lock" value="1"/>
+    <property name="type" value="tank"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="1200" y="896" width="64" height="16">
+   <properties>
+    <property name="button_id" value="belt2"/>
+    <property name="direction" value="-1"/>
+    <property name="state" value="off"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="1136" y="896" width="64" height="16">
+   <properties>
+    <property name="button_id" value="belt2"/>
+    <property name="direction" value="-1"/>
+    <property name="state" value="off"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="1200" y="736" width="64" height="16">
+   <properties>
+    <property name="button_id" value="belt2"/>
+    <property name="direction" value="-1"/>
+    <property name="state" value="off"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="1136" y="736" width="64" height="16">
+   <properties>
+    <property name="button_id" value="belt2"/>
+    <property name="direction" value="-1"/>
+    <property name="state" value="off"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="1072" y="736" width="64" height="16">
+   <properties>
+    <property name="button_id" value="belt2"/>
+    <property name="direction" value="-1"/>
+    <property name="state" value="off"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="1008" y="736" width="64" height="16">
+   <properties>
+    <property name="button_id" value="belt2"/>
+    <property name="direction" value="-1"/>
+    <property name="state" value="off"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="944" y="736" width="64" height="16">
+   <properties>
+    <property name="button_id" value="belt2"/>
+    <property name="direction" value="-1"/>
+    <property name="state" value="off"/>
+   </properties>
+  </object>
+  <object name="belt" type="ConveyorBelt" x="880" y="736" width="64" height="16">
+   <properties>
+    <property name="button_id" value="belt2"/>
+    <property name="direction" value="-1"/>
+    <property name="state" value="off"/>
+   </properties>
+  </object>
+  <object name="gun man" type="Agent" x="400" y="1200" width="32" height="64">
+   <properties>
+    <property name="type" value="gunner"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup name="PlayerLayer" width="200" height="100" visible="0"/>
+</map>

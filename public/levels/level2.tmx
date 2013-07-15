@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="200" height="70" tilewidth="16" tileheight="16">
+ <properties>
+  <property name="bg_art" value="background.png"/>
+  <property name="bg_music" value="music/silly.mp3"/>
+  <property name="fg_art" value="hill.png"/>
+ </properties>
+ <tileset firstgid="1" name="default" tilewidth="16" tileheight="16">
+  <image source="tiles.png" width="64" height="192"/>
+  <tile id="0">
+   <properties>
+    <property name="name" value="DirtRampRight"/>
+    <property name="ramp" value="1"/>
+    <property name="solid" value="1"/>
+   </properties>
+  </tile>
+  <tile id="1">
+   <properties>
+    <property name="name" value="PlusOne"/>
+   </properties>
+  </tile>
+  <tile id="2">
+   <properties>
+    <property name="name" value="PlusForever"/>
+   </properties>
+  </tile>
+  <tile id="3">
+   <properties>
+    <property name="name" value="Bullet"/>
+   </properties>
+  </tile>
+  <tile id="4">
+   <properties>
+    <property name="name" value="Dirt"/>
+    <property name="solid" value="1"/>
+   </properties>
+  </tile>
+  <tile id="5">
+   <properties>
+    <property name="name" value="Spike"/>
+    <property name="solid" value="1"/>
+    <property name="spike" value="1"/>
+   </properties>
+  </tile>
+  <tile id="6">
+   <properties>
+    <property name="name" value="Grass"/>
+    <property name="solid" value="1"/>
+   </properties>
+  </tile>
+  <tile id="7">
+   <properties>
+    <property name="mine" value="1"/>
+    <property name="name" value="LandMine"/>
+   </properties>
+  </tile>
+  <tile id="8">
+   <properties>
+    <property name="name" value="DirtRampLeft"/>
+    <property name="ramp" value="-1"/>
+    <property name="solid" value="1"/>
+   </properties>
+  </tile>
+  <tile id="9">
+   <properties>
+    <property name="breakable" value="1"/>
+    <property name="name" value="WeakStone"/>
+    <property name="solid" value="1"/>
+   </properties>
+  </tile>
+  <tile id="10">
+   <properties>
+    <property name="name" value="Stone"/>
+    <property name="solid" value="1"/>
+   </properties>
+  </tile>
+  <tile id="11">
+   <properties>
+    <property name="ladder" value="1"/>
+    <property name="name" value="Ladder"/>
+   </properties>
+  </tile>
+  <tile id="12">
+   <properties>
+    <property name="name" value="Brick"/>
+    <property name="solid" value="1"/>
+   </properties>
+  </tile>
+  <tile id="13">
+   <properties>
+    <property name="name" value="Button"/>
+    <property name="solid" value="1"/>
+   </properties>
+  </tile>
+  <tile id="14">
+   <properties>
+    <property name="name" value="ButtonPressed"/>
+   </properties>
+  </tile>
+  <tile id="15">
+   <properties>
+    <property name="name" value="BrickTop"/>
+    <property name="solid" value="1"/>
+   </properties>
+  </tile>
+  <tile id="16">
+   <properties>
+    <property name="name" value="DeadBodyLeft"/>
+    <property name="solid" value="1"/>
+   </properties>
+  </tile>
+  <tile id="17">
+   <properties>
+    <property name="name" value="DeadBodyMiddle"/>
+    <property name="solid" value="1"/>
+   </properties>
+  </tile>
+  <tile id="18">
+   <properties>
+    <property name="name" value="DeadBodyRight"/>
+    <property name="solid" value="1"/>
+   </properties>
+  </tile>
+  <tile id="19">
+   <properties>
+    <property name="name" value="BottomLeftDirtCorner"/>
+   </properties>
+  </tile>
+  <tile id="20">
+   <properties>
+    <property name="name" value="DirtBottom"/>
+    <property name="solid" value="1"/>
+   </properties>
+  </tile>
+  <tile id="21">
+   <properties>
+    <property name="name" value="BottomRightDirtCorner"/>
+   </properties>
+  </tile>
+  <tile id="22">
+   <properties>
+    <property name="breakable" value="1"/>
+    <property name="name" value="BreakableDirt"/>
+    <property name="solid" value="1"/>
+   </properties>
+  </tile>
+  <tile id="23">
+   <properties>
+    <property name="solid" value="1"/>
+   </properties>
+  </tile>
+  <tile id="26">
+   <properties>
+    <property name="solid" value="1"/>
+   </properties>
+  </tile>
+  <tile id="27">
+   <properties>
+    <property name="solid" value="1"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="Main" width="200" height="70">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAA+2c22rDMBAFg6G3Dyj9/z/tg1+MsSRXXZ+za8/AQGlDqkUa0uDUrxdE89MRcvLWEOKhj3rQhw76qAd96KCPetCHDvqoB33ooI960IcO+qgHfeigj3rQhw76qAd96KCPetCHDvqoB33oqNrH4l6AEfrQUaWPZeeToQ8dmfugh2PoQ0fmPuAY+tBBH/WgDx30UQ/60EEf9aAPHfRRD/rQQR/1oA8d9FEP+tBBH/WgDx30UQ/60EEf9aAPHfRRD/rQUaGPz+DHVafVxweG2+vDvbatZxg9x9fJ58lOqw+Mt9eHe21bz3Dmee7QjnsvnuTT+uj5n9c3ZV/uvXiS9BHnVX83ZpvzSdJH/rnOzvmN4fb6cK9t6xncZ93dB0AP91mnD8iM+6zTB2TGfdbpAzLjPuv0AZlxn3X6gMy4z/qMM9dM6ANmcJ91twA93OfTLUAP9/l0C9DDfY1fJX0AtKEPgDb0AdCGPgDa0AdAG/oAaNPqI8M9MgDcuK6vvO8EyIirj4jXoEr3iQENS+PrWVx9RPmkRmbvWei612Hr9/71+9ufHT3myvnc5zvLa1Hke6Kr37spvNuMs7jPdib374lmdc8R4Qj3+qLnucucqHGEe33R89xlTtQ4wr2+6HnuMidqHOFeX/Q8d5kTNY5w/1/GFfeEPMK9D5hTWHHvA+YUVtz7gDmFFfc+YE5hxb0PmFNYce8D5hRW3PuAOR19hsb9eSqV7n1ARERERERExLa//USB1sDaAAA=
+  </data>
+ </layer>
+ <layer name="Ladders" width="200" height="70">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAA+3TMQ0AMAzAsAIYf7xDkHurZCPIkxkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADY6rwPgY/6A5g9o/oDmD2j+gOYPaP6A5g9o/oDmD2j+gOYPaP6A5g9o/oDmD2j+gOYPaP6A5g9o/oDmD2j+gOYPaP6A5g8AAAAANrtG1hL0wNoAAA==
+  </data>
+ </layer>
+ <objectgroup name="Object Layer 1" width="200" height="70">
+  <object name="helper text - dying" type="Text" x="642" y="605" width="467" height="134">
+   <properties>
+    <property name="font_size" value="18"/>
+    <property name="text" value="Press '1' in the air to do a Belly Flop. You can sacrifice the leader's life to save the rest of the pack."/>
+   </properties>
+  </object>
+  <object name="Start Point" type="StartPoint" x="144" y="704" width="80" height="64"/>
+  <object name="Monster" type="Agent" x="1680" y="352" width="64" height="64">
+   <properties>
+    <property name="type" value="monster"/>
+   </properties>
+  </object>
+  <object name="winnar" type="Victory" x="1152" y="304" width="160" height="112"/>
+  <object name="winnar sign" type="Decoration" x="1200" y="384" width="80" height="32">
+   <properties>
+    <property name="img" value="winnar.png"/>
+   </properties>
+  </object>
+  <object name="helper text - explode" type="Text" x="1600" y="192" width="368" height="128">
+   <properties>
+    <property name="font_size" value="18"/>
+    <property name="text" value="You can press '2' to suicide bomb. This can destroy blocks and monsters."/>
+   </properties>
+  </object>
+  <object name="helper text" type="Text" x="2656" y="480" width="224" height="112">
+   <properties>
+    <property name="font_size" value="18"/>
+    <property name="text" value="hmmmmmmm... how are you going to get up there?"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup name="PlayerLayer" width="200" height="70" visible="0"/>
+</map>
