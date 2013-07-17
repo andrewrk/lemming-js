@@ -2,6 +2,7 @@ var TileSet = require('./tiles').TileSet;
 var chem = require('chem');
 var Vec2d = chem.vec2d.Vec2d;
 var util = require('util');
+var modulus = require('./euclidean_mod');
 
 function sign(n) {
   if (n > 0) {
@@ -618,12 +619,10 @@ LevelPlayer.prototype.loadImages = function() {
   // TODO: generate the minus animations?
 
   this.img_hud = chem.resources.getImage('hud');
-  this.img_bullet = chem.resources.getImage('bullet');
-  this.img_bomb = chem.resources.getImage('bomb');
   this.img_gore = [
-    chem.resources.getImage('gore1'),
-    chem.resources.getImage('gore2'),
-    chem.resources.getImage('gore3'),
+    'gore1',
+    'gore2',
+    'gore3',
   ];
 
   var name;
@@ -771,23 +770,127 @@ LevelPlayer.prototype.start = function() {
 };
 
 LevelPlayer.prototype.getGrabbedBy = function(monster, throw_vel) {
-  // TODO: port this function
+  var self = this;
+  self.lemmings[self.control_lemming].frame.vel = new Vec2d(0, 0);
+  self.lemmings[self.control_lemming].sprite.visible = false;
+  self.held_by = monster;
+
+  // hide sprite until throw animation is over
+  // TODO: minus thing
+  var negate = "";
+  if (monster.direction < 0) negate = '-';
+  monster.sprite.setAnimationName(negate+"monster_throw");
+  monster.sprite.once('animationend', reset_animation);
+
+  function reset_animation() {
+    monster.sprite.setAnimationName(negate+"monster_still");
+    self.lemmings[self.control_lemming].frame.vel = monster.vel.plus(throw_vel);
+    self.lemmings[self.control_lemming].frame.pos = new Vec2d(
+        monster.pos.x + (1+monster.direction)*self.level.tilewidth,
+        monster.pos.y);
+    self.lemmings[self.control_lemming].sprite.visible = true;
+    self.held_by = null;
+    setTimeout(not_grabbing, 2000);
+    self.sfx[['weee', 'woopee'][Math.floor(Math.random() * 2)]].play();
+    function not_grabbing() {
+      monster.grabbing = false;
+    }
+  }
 };
 
 LevelPlayer.prototype.detachHeadLemming = function() {
-  // TODO: port this function
+  var head_lemming = this.lemmings[this.control_lemming];
+
+  head_lemming.sprite.delete();
+  head_lemming.sprite = null;
+
+  this.control_lemming += 1;
+  if (this.control_lemming === this.lemmings.length) {
+    // game over
+    this.handleGameOver();
+    return;
+  }
+  head_lemming = this.lemmings[this.control_lemming];
+
+  head_lemming.sprite.alpha = 1;
+  head_lemming.frame.prev_node = null;
 };
 
 LevelPlayer.prototype.handleExplosion = function(pos, vel, caused_by_self) {
-  // TODO: port this function
+  this.playSoundAt('blast', pos);
+  var sprite = new chem.Sprite('explosion', {
+    batch: this.batch_level,
+    zOrder: this.group_fg,
+  });
+  debugger; // check if animations.explosion.duration worked below
+  this.physical_objects.push(new PhysicsObject(pos, vel, sprite, new Vec2d(1, 1),
+        chem.resources.animations.explosion.duration));
+  var explosion_power = 4;
+
+  // break blocks
+  var it = new Vec2d(0, 0);
+  var block_pos = pos.divBy(tile_size).floor();
+  for (it.y = 0; it.y < explosion_power * 2; it.y += 1) {
+    for (it.x = 0; it.x < explosion_power * 2; it.x += 1) {
+      var pt = block_pos.plus(it).offset(-explosion_power, -explosion_power);
+      if (pt.distance(block_pos) <= explosion_power) {
+        // affect block
+        var tile = this.getTile(pt);
+        if (tile.breakable) this.setTile(pt, this.tiles.enum.Air);
+      }
+    }
+  }
+
+  // see if we need to blow up any monsters
+  this.physical_objects.forEach(blowUpObj);
+  if (this.control_lemming < this.lemmings.length && ! caused_by_self) {
+    blowUpObj(this.lemmings[this.control_lemming]);
+  }
+  var self = this;
+  function blowUpObj(obj) {
+    if (obj.gone) return;
+    var obj_center = obj.size.times(tile_size).scale(0.5).plus(obj.pos);
+    var distance = obj_center.distance(pos);
+    // TODO tilewidth
+    if (distance < explosion_power * self.level.tilewidth) {
+      if (obj.explodable) {
+        // kill monster
+        obj.delete();
+      } else {
+        // propel object by the explosion
+        var direction = obj_center.minus(pos);
+        var propel_factor = 20;
+        obj.vel.add(direction.scaled(propel_factor));
+        obj.on_ladder = false;
+      }
+    }
+  }
 };
 
 LevelPlayer.prototype.handleGameOver = function() {
-  // TODO: port this function
+  var self = this;
+
+  self.bg_music.pause();
+  self.sfx.game_over.play();
+
+  setTimeout(restart, 4000);
+
+  function restart() {
+    self.game.restartLevel();
+  }
 };
 
 LevelPlayer.prototype.handleVictory = function() {
-  // TODO: port this function
+  var self = this;
+
+  self.bg_music.pause();
+  self.sfx.winnar.play();
+
+  setTimeout(goNext, 4000);
+
+  function goNext() {
+    self.game.gotoNextLevel();
+  }
 };
 
 LevelPlayer.prototype.update = function(dt, dx) {
@@ -814,19 +917,68 @@ LevelPlayer.prototype.update = function(dt, dx) {
 };
 
 LevelPlayer.prototype.on_draw = function(context) {
-  // TODO: port this function
+  // far background
+  var far_bgpos = new Vec2d(
+      -modulus(this.scroll.x * 0.25, this.sprite_bg_left.width),
+      -(this.scroll.y * 0.10));
+  // TODO: these y coords are fucked
+  if (far_bgpos.y > 0) far_bgpos.y = 0;
+  if (far_bgpos.y + this.sprite_bg_left.size.y < this.game.engine.size.y) {
+    far_bgpos.y = this.game.engine.size.y - this.sprite_bg_left.size.y;
+  }
+  far_bgpos.floor();
+
+  context.setTransform(1, 0, 0, 1, 0, 0); // load identity
+  context.translate(far_bgpos.x, far_bgpos.y);
+  this.batch_bg2.draw(context);
+
+  // close background
+  var close_bgpos = new Vec2d(
+      -modulus(this.scroll.x * 0.5, this.sprite_bg2_left.width),
+      -(this.scroll.y * 0.20));
+  // TODO: these y coords are also fucked
+  if (close_bgpos.y > 0) close_bgpos.y = 0;
+  close_bgpos.floor();
+  context.setTransform(1, 0, 0, 1, 0, 0); // load identity
+  context.translate(close_bgpos.x, close_bgpos.y);
+  this.batch_bg1.draw(context);
+
+  // level
+  var floored_scroll = this.scroll.floored().scale(-1);
+  context.setTransform(1, 0, 0, 1, 0, 0); // load identity
+  context.translate(floored_scroll.x, floored_scroll.y);
+  this.batch_level.draw(context);
+
+  // hud
+  context.setTransform(1, 0, 0, 1, 0, 0); // load identity
+  this.batch_static.draw(context);
+  this.fps_display.draw(context);
 };
 
 LevelPlayer.prototype.blockAt = function(abs_pt) {
-  // TODO: port this function
+  return abs_pt.divBy(tile_size).floor();
 };
 
 LevelPlayer.prototype.getTile = function(block_pos, layer_index) {
-  // TODO: port this function
+  var tile = null;
+  try {
+    debugger; // make sure that crazy lookup will work
+    tile = this.tiles.info[this.level.layers[layer_index].content2D[block_pos.x][block_pos.y]];
+  } catch (err) {}
+  if (tile) return tile;
+  return this.tiles.info[this.tiles.enum.Air];
 };
 
 LevelPlayer.prototype.getBlockIsSolid = function(block_pos) {
-  // TODO: port this function
+  var tile_there = this.getTile(block_pos);
+  if (tile_there.solid) return true;
+
+  // check if there is an object filling this role
+  for (var i = 0; i < this.platform_objects.length; i += 1) {
+    var platform = this.platform_objects[i];
+    if (platform.solidAt(block_pos)) return true;
+  }
+  return false;
 };
 
 LevelPlayer.prototype.setTile = function(block_pos, tile_Id) {
@@ -834,41 +986,91 @@ LevelPlayer.prototype.setTile = function(block_pos, tile_Id) {
 };
 
 LevelPlayer.prototype.garbage_collect = function(dt) {
-  // TODO: port this function
+  if (this.physical_objects == null) return;
+  this.physical_objects = this.physical_objects.filter(notGone);
+  function notGone(obj) {
+    return !obj.gone;
+  }
 };
 
 LevelPlayer.prototype.hitButtonId = function(button_id) {
-  // TODO: port this function
+  var responders = this.button_responders[button_id];
+  if (!responders) return;
+  responders.forEach(function(responder) {
+    responder.toggle();
+  });
 };
 
 LevelPlayer.prototype.load = function() {
   // TODO: port this function
 };
 
-LevelPlayer.prototype.isVictory = function() {
-  // TODO: port this function
-};
-
-LevelPlayer.prototype.execute = function() {
-  // TODO: port this function
+LevelPlayer.prototype.isVictory = function(block) {
+  return !!this.victory[block.toString()];
 };
 
 LevelPlayer.prototype.spawnBullet = function(pos, vel) {
-  // TODO: port this function
+  var sprite = new chem.Sprite('bullet', {
+    pos: pos.clone(),
+    batch: this.batch_level,
+    zOrder: this.group_fg,
+  });
+  var bullet = new Bullet(pos, vel, sprite, this);
+  this.physical_objects.push(bullet);
+  this.playSoundAt('gunshot', pos);
 };
 
 LevelPlayer.prototype.hitByBullet = function() {
-  // TODO: port this function
+  var char = this.lemmings[this.control_lemming];
+  if (!char) return;
+
+  this.detach_queued = true;
+  debugger; // make sure char.size works
+  this.spawnGoreExplosion(char.pos, char.vel, char.size);
 };
 
 LevelPlayer.prototype.spawnBomb = function(pos, vel, fuse) {
-  // TODO: port this function
+  var sprite = new chem.Sprite('bomb', {
+    pos: pos.clone(),
+    batch: this.batch_level,
+    zOrder: this.group_fg,
+  });
+  var bomb = new Bomb(pos, vel, fuse, sprite, this);
+  this.physical_objects.push(bomb);
 };
 
 LevelPlayer.prototype.playSoundAt = function(sfx_name, pos) {
-  // TODO: port this function
+  var audio = this.sfx[sfx_name].play();
+  var zero_volume_distance_sqrd = 640000;
+  debugger; // double check dat math
+  audio.volume = 1 - pos.distanceSqrd(this.scroll.plus(this.game.engine.size.scaled(0.5))) / zero_volume_distance_sqrd;
+  return audio;
 };
 
 LevelPlayer.prototype.spawnGoreExplosion = function(pos, vel, size) {
-  // TODO: port this function
+  // how many to spawn
+  var amt = Math.floor(Math.random() * 20 + 10);
+
+  var vel_variability = new Vec2d(300, 200);
+  var center_vel = new Vec2d(0, 300);
+  for (var i = 0; i < amt; i += 1) {
+    // pick a random position
+    var this_pos = pos.offset(
+        Math.random() * size.x * this.level.tilewidth,
+        Math.random() * size.y * this.level.tileheight);
+    // pick velocity
+    var this_vel = center_vel.offset(
+        Math.random() * vel_variability.x - vel_variability.x / 2,
+        Math.random() * vel_variability.y - vel_variability.y / 2);
+    // pick graphic
+    var this_graphic = this.img_gore[Math.floor(Math.random() * this.img_gore.length)];
+
+    var sprite = new chem.Sprite(this_graphic, {
+      pos: this_pos.clone(),
+      zOrder: this.group_fg,
+      batch: this.batch_level,
+    });
+    var obj = new PhysicsObject(this_pos, this_vel, sprite, new Vec2d(1, 1), 10);
+    this.physical_objects.push(obj);
+  }
 };
