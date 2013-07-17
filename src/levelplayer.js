@@ -21,8 +21,9 @@ function abs_min(a, b) {
 }
 
 var tile_size = null;
-var lemming_count = 9;
-var lemming_response_time = 0.40;
+var LEMMING_COUNT = 9;
+var LEMMING_RESPONSE_TIME = 0.40;
+var TARGET_FPS = 60;
 
 var Control = {
   MoveLeft: 0,
@@ -531,10 +532,12 @@ function BombSpawner(pos, size, game, delay, state, fuse_min, fuse_max) {
 BombSpawner.prototype.toggle = function() {
   this.state = !this.state;
 
+  // TODO: make it so that game.clear() cleans this up
   if (this.state) {
     this.interval = setInterval(this.spawn.bind(this), this.delay * 1000);
   } else {
     clearInterval(this.interval);
+    this.interval = null;
   }
 };
 
@@ -659,19 +662,112 @@ LevelPlayer.prototype.loadImages = function() {
 };
 
 LevelPlayer.prototype.loadConfig = function() {
-  // TODO: port this function
+  this.controls = {};
+  this.controls[Control.MoveLeft] = chem.button.KeyLeft;
+  this.controls[Control.MoveRight] = chem.button.KeyRight;
+  this.controls[Control.MoveUp] = chem.button.KeyUp;
+  this.controls[Control.MoveDown] = chem.button.KeyDown;
+  this.controls[Control.BellyFlop] = chem.button.Key1;
+  this.controls[Control.Explode] = chem.button.Key2;
+  this.controls[Control.Freeze] = chem.button.Key3;
 };
 
 LevelPlayer.prototype.getDesiredScroll = function(point) {
-  // TODO: port this function
+  var scroll = point.minus(this.game.engine.size.scaled(0.5))
+  if (scroll.x < 0) scroll.x = 0;
+  if (scroll.y < 0) scroll.y = 0;
+  var maxRight = this.level.width * this.level.tilewidth - this.game.engine.size.x;
+  if (scroll.x > maxRight) scroll.x = maxRight;
+  var maxDown = this.level.height * this.level.tileheight - this.game.engine.size.y;
+  if (scroll.y > maxDown) scroll.y = maxDown;
+  return scroll;
 };
 
 LevelPlayer.prototype.clear = function() {
-  // TODO: port this function
+  this.game.engine.removeAllListeners();
+  for (var i = 0; i < this.intervals.length; i += 1) {
+    clearInterval(this.intervals[i]);
+  }
+  this.intervals = null;
+
+  this.bg_music.pause();
+  this.bg_music = null;
+
+  this.lemmings = null;
+
+  this.level = null;
+  this.physical_objects = null;
+  this.button_responders = null;
+  this.platform_objects = null;
+  this.buttons = null;
+  this.victory = null;
+
+  this.batch_bg2 = null;
+  this.batch_bg1 = null;
+  this.batch_level = null;
+  this.batch_static = null;
+
+  this.stopRunningSound();
 };
 
 LevelPlayer.prototype.start = function() {
-  // TODO: port this function
+  this.load();
+
+  this.game.engine.on('draw', this.on_draw.bind(this));
+
+  this.scroll = this.getDesiredScroll(this.start_point);
+  this.scroll_vel = new Vec2d(0, 0);
+  this.last_scroll_delta = new Vec2d(0, 0);
+  this.lemmings = new Array(LEMMING_COUNT);
+  this.control_lemming = 0;
+  this.held_by = null;
+  this.handled_victory = false;
+
+  this.explode_queued = false; // true when the user presses the button util an update happens
+  this.bellyflop_queued = false;
+  this.freeze_queued = false;
+  this.plus_ones_queued = 0;
+  this.detach_queued = false;
+
+  // resets variables based on level and begins the game
+  // generate data for each lemming
+  for (var i = 0; i < this.lemmings.length; i += 1) {
+    var sprite = new chem.Sprite('lem_crazy', {
+      batch: this.batch_level,
+      zOrder: this.group_char,
+    })
+    if (i > 0) sprite.alpha = 0.50;
+    this.lemmings[i] = new Lemming(sprite, null);
+  }
+
+  // generate frames for trails
+  var head_frame = new LemmingFrame(this.start_point.clone(), new Vec2d(0, 0));
+  var lemming_index = this.lemmings.length - 1;
+  this.lemmings[lemming_index].frame = head_frame;
+  lemming_index -= 1;
+  var lemming_frame_count = 1;
+  while (TARGET_FPS * LEMMING_RESPONSE_TIME * (this.lemmings.length-1) > lemming_frame_count) {
+    head_frame = new LemmingFrame(head_frame.pos.clone(), head_frame.vel.clone(), head_frame);
+    lemming_frame_count += 1;
+    if (Math.floor((this.lemmings.length - 1 - lemming_index) *
+          TARGET_FPS * LEMMING_RESPONSE_TIME) === lemming_frame_count)
+    {
+      this.lemmings[lemming_index].frame = head_frame;
+      lemming_index -= 1;
+    }
+  }
+
+  this.game.engine.on('update', this.update.bind(this));
+
+  this.intervals.push(setInterval(this.garbage_collect.bind(this), 10000));
+  this.fps_display = this.game.engine.createFpsLabel();
+
+  this.sfx.level_start.play();
+
+  this.sprite_hud = new chem.Sprite('hud', {
+    batch: this.batch_static,
+    pos: new Vec2d(0, 0),
+  });
 };
 
 LevelPlayer.prototype.getGrabbedBy = function(monster, throw_vel) {
@@ -695,16 +791,29 @@ LevelPlayer.prototype.handleVictory = function() {
 };
 
 LevelPlayer.prototype.update = function(dt, dx) {
+  if (this.game.engine.buttonJustPressed(this.controls[Control.Explode])) {
+    this.explode_queued = true;
+  }
+  if (this.game.engine.buttonJustPressed(this.controls[Control.BellyFlop])) {
+    if (this.held_by != null) {
+      this.bellyflop_queued = true;
+    } else {
+      var char = this.lemmings[this.control_lemming];
+      // TODO: wtf is level.tilewidth
+      var pos_at_feet = new Vec2d(char.frame.pos.x + this.level.tilewidth / 2, char.frame.pos.y - 1);
+      var block_at_feet = pos_at_feet.divBy(tile_size).floor();
+      var on_ground = this.getBlockIsSolid(block_at_feet);
+
+      if (! on_ground) this.bellyflop_queued = true;
+    }
+  }
+  if (this.game.engine.buttonJustPressed(this.controls[Control.Freeze])) {
+    this.freeze_queued = true;
+  }
   // TODO: port this function
 };
 
-LevelPlayer.prototype.on_key_press = function(button) {
-  // TODO: port this function
-  // TODO: probably want to move the logic to update and
-  // utilize buttonJustPressed
-};
-
-LevelPlayer.prototype.on_draw = function() {
+LevelPlayer.prototype.on_draw = function(context) {
   // TODO: port this function
 };
 
