@@ -124,7 +124,29 @@ Tank.prototype.changeDirection = function(new_dir) {
 };
 
 Tank.prototype.wantToShoot = function() {
-  // TODO port the rest
+  var self = this;
+  if (! self.can_shoot) return;
+  self.can_shoot = false;
+  setTimeout(recharge, self.shoot_delay * 1000);
+
+  var gun_offset = new Vec2d(28*self.direction, 32);
+  var bullet_init_vel = new Vec2d(350*self.direction, 300);
+  self.game.spawnBomb(self.pos.plus(gun_offset), self.vel.plus(bullet_init_vel), 1);
+
+  // TODO minus thing :-/
+  var name;
+  if (self.direction < 0) {
+    name = '-tank_shoot';
+  } else if (self.direction > 0) {
+    name = 'tank_shoot';
+  } else {
+    return;
+  }
+  self.sprite.setAnimationName(name);
+
+  function recharge() {
+    self.can_shoot = true;
+  }
 };
 
 function Gunner(pos, size, group, batch, game) {
@@ -140,15 +162,68 @@ function Gunner(pos, size, group, batch, game) {
 util.inherits(Gunner, PhysicsObject);
 
 Gunner.prototype.think = function(dt) {
-  // TODO port the rest
+  if (this.game.control_lemming >= this.game.lemmings.length) return;
+
+  var player_pos = this.game.lemmings[this.game.control_lemming].pos.divBy(tile_size).floor();
+  var player_size = this.game.lemmings[this.game.control_lemming].size;
+  var my_pos = this.pos.divBy(tile_size).floor();
+
+  // if we can trace a path to lem then look at him
+  var see_distance = 30;
+  var can_see = false;
+  var look_direction = sign(player_pos.x - my_pos.x);
+  var eye_y = this.size.y - 1;
+  for (var x = 0; x < see_distance; x += 1) {
+    var test_pos = new Vec2d(my_pos.x + x * look_direction, my_pos.y + eye_y);
+    if (this.game.getBlockIsSolid(test_pos)) break;
+    if (test_pos.x >= player_pos.x && test_pos.x < player_pos.x + player_size.x &&
+        test_pos.y >= player_pos.y && test_pos.y < player_pos.y + player_size.y)
+    {
+      can_see = true;
+      break;
+    }
+    if (can_see) {
+      this.changeDirection(look_direction);
+      this.wantToShoot();
+    } else {
+      this.changeDirection(0);
+    }
+  }
 };
 
 Gunner.prototype.wantToShoot = function() {
-  // TODO port the rest
+  var self = this;
+  if (self.direction === 0) return;
+  if (! self.can_shoot) return;
+  self.can_shoot = false;
+  setTimeout(recharge, self.shoot_delay * 1000);
+
+  var gun_offset = new Vec2d(64*self.direction, 16);
+  var bullet_init_vel = new Vec2d(1100*self.direction, 200);
+  self.game.spawnBullet(self.pos.plus(gun_offset), self.vel.plus(bullet_init_vel));
+
+  // TODO minus thing
+  var name = self.direction < 0 ? '-gunner_shoot' : 'gunner_shoot';
+  self.sprite.setAnimationName(name);
+
+  function recharge() {
+    self.can_shoot = true;
+  }
 };
 
 Gunner.prototype.changeDirection = function(new_dir) {
-  // TODO port the rest
+  if (new_dir === this.direction) return;
+  this.direction = new_dir;
+  // TODO minus thing
+  var name;
+  if (this.direction < 0) {
+    name = '-gunner_point';
+  } else if (this.direction > 0) {
+    name = 'gunner_point';
+  } else {
+    name = 'gunner_still';
+  }
+  this.sprite.setAnimationName(name);
 };
 
 function Bomb(pos, vel, fuse, sprite, game) {
@@ -176,7 +251,45 @@ function Bullet(pos, vel, sprite, game) {
 util.inherits(Bullet, PhysicsObject);
 
 Bullet.prototype.think = function(dt) {
-  // TODO port the rest
+  var old_prev_pos = this.prev_pos;
+  this.prev_pos = new Vec2d(this.pos);
+
+  // if we're going too slow, die
+  var die_threshold = 100;
+  if (Math.abs(this.vel.x) < die_threshold) {
+    this.delete();
+    return;
+  }
+
+  if (this.game.control_lemming >= this.game.lemmings.length) return;
+
+  var player_pos = this.game.lemmings[this.game.control_lemming].pos.divBy(tile_size).floor();
+  var player_size = this.game.lemmings[this.game.control_lemming].size;
+  var vector_it = old_prev_pos.clone();
+  var unit_vector_vel = this.vel.normalized();
+  var last_one = false;
+  while (! last_one) {
+    vector_it.add(unit_vector_vel.scaled(tile_size));
+    // if we hit something solid, die
+    if (old_prev_pos.distanceSqrd(this.pos) < old_prev_pos.distanceSqrd(vector_it)) {
+      last_one = true;
+      vector_it = this.pos;
+    }
+    var my_block = vector_it.divBy(tile_size).floor();
+    if (this.game.getBlockIsSolid(my_block)) {
+      this.delete();
+      return;
+    }
+
+    // test for hitting player
+    if (my_block.x >= player_pos.x && my_block.x < player_pos.x + player_size.x &&
+        my_block.y >= player_pos.y && my_block.y < player_pos.y + player_size.y)
+    {
+      this.game.hitByBullet();
+      this.delete();
+      return;
+    }
+  }
 };
 
 function Monster(pos, size, group, batch, game, direction, throw_vel) {
@@ -201,7 +314,22 @@ function Monster(pos, size, group, batch, game, direction, throw_vel) {
 util.inherits(Monster, PhysicsObject);
 
 Monster.prototype.think = function(dt) {
-  // TODO port the rest
+  if (this.game.control_lemming < this.game.lemmings.length) {
+    var player_pos = this.game.lemmings[this.game.control_lemming].pos.divBy(tile_size).floor();
+    var my_pos = this.pos.divBy(tile_size).floor();
+    var get_him;
+    if (this.direction > 0) {
+      get_him = player_pos.x >= my_pos.x + 2 && player_pos.x <= my_pos.x+5;
+    } else {
+      get_him = player_pos.x <= my_pos.x + 2 && player_pos.x >= my_pos.x-3;
+    }
+    if (get_him && (player_pos.y === my_pos.y || player_pos.y === my_pos.y + 1) &&
+        !this.grabbing)
+    {
+      this.grabbing = true;
+      this.game.getGrabbedBy(this, this.throw_vel);
+    }
+  }
 };
 
 function PlatformObject() {}
@@ -228,7 +356,26 @@ function ConveyorBelt(pos, size, sprite, game, state, direction) {
 }
 
 ConveyorBelt.prototype.toggle = function() {
-  // TODO port the rest
+  this.state = !this.state;
+
+  var new_tile;
+  if (this.state) {
+    // TODO minus thing
+    this.sprite.setAnimationName(this.animations[this.direction]);
+    this.setCorrectPosition();
+
+    new_tile = this.direction > 0 ? this.game.tiles.enum.BeltRight : this.game.tiles.enum.BeltLeft;
+  } else {
+    this.sprite.setAnimationName('belt_off');
+    this.setCorrectPosition();
+    new_tile = this.game.tiles.enum.SolidInvisible;
+  }
+  var it = new Vec2d(0, 0);
+  for (it.x = 0; it.x < this.size.x; it.x += 1) {
+    for (it.y = 0; it.y < this.size.y; it.y += 1) {
+      this.game.setTile(this.pos.plus(it), new_tile);
+    }
+  }
 };
 
 ConveyorBelt.prototype.setCorrectPosition = function() {
@@ -426,19 +573,89 @@ function LevelPlayer(game, level_fd) {
 }
 
 LevelPlayer.prototype.getNextGroupNum = function() {
-  // TODO: port this function
+  var val = this.next_group_num;
+  this.next_group_num += 1;
+  return val;
 };
 
 LevelPlayer.prototype.loadSoundEffects = function() {
-  // TODO: port this function
+  this.sfx = {
+    'blast': new chem.Sound('sfx/blast.mp3'),
+    'button_click': new chem.Sound('sfx/button_click.mp3'),
+    'button_unclick': new chem.Sound('sfx/button_unclick.mp3'),
+    'coin_pickup': new chem.Sound('sfx/coin_pickup.mp3'),
+    'game_over': new chem.Sound('sfx/game_over.mp3'),
+    'gunshot': new chem.Sound('sfx/gunshot.mp3'),
+    'jump': new chem.Sound('sfx/jump.mp3'),
+    'level_start': new chem.Sound('sfx/level_start.mp3'),
+    'mine_beep': new chem.Sound('sfx/mine_beep.mp3'),
+    'spike_death': new chem.Sound('sfx/spike_death.mp3'),
+    'weee': new chem.Sound('sfx/weee.mp3'),
+    'winnar': new chem.Sound('sfx/winnar.mp3'),
+    'woopee': new chem.Sound('sfx/woopee.mp3'),
+  };
+  this.ladder_audio = new Audio('sfx/ladder.mp3');
+  this.running_audio = new Audio('sfx/running.mp3');
+  this.current_running_audio = null;
+};
+
+LevelPlayer.prototype.stopRunningSound = function() {
+  if (this.current_running_audio != null) this.current_running_audio.pause();
 };
 
 LevelPlayer.prototype.setRunningSound = function(source) {
-  // TODO: port this function
+  this.stopRunningSound();
+  if (source == null) return;
+  this.current_running_audio = source;
+  this.current_running_audio.loop = true;
+  this.current_running_audio.play();
 };
 
 LevelPlayer.prototype.loadImages = function() {
-  // TODO: port this function
+  // TODO: generate the minus animations?
+
+  this.img_hud = chem.resources.getImage('hud');
+  this.img_bullet = chem.resources.getImage('bullet');
+  this.img_bomb = chem.resources.getImage('bomb');
+  this.img_gore = [
+    chem.resources.getImage('gore1'),
+    chem.resources.getImage('gore2'),
+    chem.resources.getImage('gore3'),
+  ];
+
+  var name;
+  if (this.level.properties.bg_art) {
+    name = this.level.properties.bg_art;
+    this.sprite_bg_left = new chem.Sprite(name, { batch: this.batch_bg2 });
+    this.sprite_bg_right = new chem.Sprite(name, { batch: this.batch_bg2});
+    this.sprite_bg_left.pos = new Vec2d(0, 0);
+    this.sprite_bg_right.pos = new Vec2d(this.sprite_bg_left.size.x, 0);
+  } else {
+    console.log("map is missing 'bg_art' property");
+    this.sprite_bg_left = null;
+    this.sprite_bg_right = null;
+  }
+
+  if (this.level.properties.fg_art) {
+    name = this.level.properties.fg_art;
+    this.sprite_bg2_left = new chem.Sprite(name, {batch: this.batch_bg1});
+    this.sprite_bg2_right = new chem.Sprite(name, {batch: this.batch_bg1});
+    this.sprite_bg2_left.pos = new Vec2d(0, 0);
+    this.sprite_bg2_right.pos = new Vec2d(this.sprite_bg2_left.size.x, 0);
+  } else {
+    console.log("map is missing 'fg_art' property");
+    this.sprite_bg2_left = null;
+    this.sprite_bg2_right = null;
+  }
+
+  this.label_mans = new chem.Label('9', {
+    font: "18pt Arial",
+    pos: new Vec2d(150, 0),
+    batch: this.batch_static,
+    fillStyle: "#000000",
+    textAlign: 'left',
+    textBaseline: 'top',
+  });
 };
 
 LevelPlayer.prototype.loadConfig = function() {

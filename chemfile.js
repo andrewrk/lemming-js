@@ -179,6 +179,14 @@ exports.spritesheet = {
     'title/lem': {
       anchor: 'bottomleft',
     },
+    'hud': {
+      anchor: 'topleft',
+    },
+    'bullet': {},
+    'bomb': {},
+    'gore1': {},
+    'gore2': {},
+    'gore3': {},
   },
 };
 

@@ -83,7 +83,7 @@ MainMenu.prototype.handleContinue = function() {
 };
 
 MainMenu.prototype.on_draw = function(context) {
-  this.game.engine.draw(this.batch);
+  this.batch.draw(context);
 };
 
 MainMenu.prototype.update = function(dt, dx) {

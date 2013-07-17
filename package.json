@@ -6,7 +6,7 @@
     "dev": "npm install && chem dev"
   },
   "dependencies": {
-    "chem-cli": "~0.5.1",
-    "chem": "~0.4.5"
+    "chem-cli": "~0.5.2",
+    "chem": "~0.5.0"
   }
 }
