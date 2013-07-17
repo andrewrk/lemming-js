@@ -894,26 +894,280 @@ LevelPlayer.prototype.handleVictory = function() {
 };
 
 LevelPlayer.prototype.update = function(dt, dx) {
-  if (this.game.engine.buttonJustPressed(this.controls[Control.Explode])) {
-    this.explode_queued = true;
+  var self = this;
+  // handle control input
+  if (self.game.engine.buttonJustPressed(self.controls[Control.Explode])) {
+    self.explode_queued = true;
   }
-  if (this.game.engine.buttonJustPressed(this.controls[Control.BellyFlop])) {
-    if (this.held_by != null) {
-      this.bellyflop_queued = true;
+  if (self.game.engine.buttonJustPressed(self.controls[Control.BellyFlop])) {
+    if (self.held_by != null) {
+      self.bellyflop_queued = true;
     } else {
-      var char = this.lemmings[this.control_lemming];
+      var char = self.lemmings[self.control_lemming];
       // TODO: wtf is level.tilewidth
-      var pos_at_feet = new Vec2d(char.frame.pos.x + this.level.tilewidth / 2, char.frame.pos.y - 1);
+      var pos_at_feet = new Vec2d(char.frame.pos.x + self.level.tilewidth / 2, char.frame.pos.y - 1);
       var block_at_feet = pos_at_feet.divBy(tile_size).floor();
-      var on_ground = this.getBlockIsSolid(block_at_feet);
+      var on_ground = self.getBlockIsSolid(block_at_feet);
 
-      if (! on_ground) this.bellyflop_queued = true;
+      if (! on_ground) self.bellyflop_queued = true;
     }
   }
-  if (this.game.engine.buttonJustPressed(this.controls[Control.Freeze])) {
-    this.freeze_queued = true;
+  if (self.game.engine.buttonJustPressed(self.controls[Control.Freeze])) {
+    self.freeze_queued = true;
   }
-  // TODO: port this function
+
+  self.label_mans.text = (self.lemmings.length - self.control_lemming).toString();
+  var old_head_lemming;
+  if (self.control_lemming < self.lemmings.length) {
+    if (self.explode_queued) {
+      self.explode_queued = false;
+
+      if (self.held_by != null) {
+        var explosion_pos = self.held_by.pos.plus(self.held_by.size.scaled(0.5).times(tile_size));
+        self.handleExplosion(explosion_pos, self.held_by.vel, true);
+      } else {
+        old_head_lemming = self.lemmings[self.control_lemming];
+        self.handleExplosion(old_head_lemming.frame.pos.offset(0, 2), old_head_lemming.frame.vel, true);
+      }
+      self.detachHeadLemming();
+    } else if (self.detach_queued && self.held_by == null) {
+      self.detach_queued = false;
+      self.detachHeadLemming();
+    } else if (self.bellyflop_queued && self.held_by == null) {
+      self.bellyflop_queued = false;
+
+      old_head_lemming = self.lemmings[self.control_lemming];
+      var direction = sign(old_head_lemming.frame.vel.x);
+      // TODO minus thing
+      var animationName;
+      if (direction < 0)  {
+        animationName = '-lem_belly_flop';
+      } else {
+        direction = 1;
+        animationName = 'lem_belly_flop';
+      }
+
+      // if it would be in the wall, move it out
+      var size = new Vec2d(3, 1);
+      var shift = 0;
+      var obj_pos = new Vec2d(old_head_lemming.frame.pos.x, old_head_lemming.frame.pos.y);
+      var sprite = new chem.Sprite(animationName, {
+        batch: self.batch_level,
+        zOrder: self.group_fg,
+      });
+      var obj = new PhysicsObject(obj_pos, old_head_lemming.frame.vel, sprite,
+          size, undefined, true, true, direction);
+      // shift it left until not in wall
+      function inWall() {
+        var it = new Vec2d(0, 0);
+        for (it.x = 0; it.x < size.x; it.x += 1) {
+          for (it.y = 0; it.y < size.y; it.y += 1) {
+            var block = obj.pos.divBy(tile_size).apply(Math.round).floor().plus(it);
+            if (self.getBlockIsSolid(block)) return true;
+          }
+        }
+        return false;
+      }
+      while inWall() {
+        obj.pos.x -= self.level.tilewidth;
+      }
+      self.physical_objects.push(obj);
+      self.detachHeadLemming();
+      self.sfx[['weee', 'woopee'][Math.floor(Math.random() * 2)]].play();
+    }
+  }
+
+  // add more lemmings
+  while (self.plus_ones_queued > 0 && self.control_lemming > 0) {
+    self.plus_ones_queued -= 1;
+    self.control_lemming -= 1;
+    for (var i = self.control_lemming; i < self.lemmings.length - 1; i += 1) {
+      self.lemmings[i] = self.lemmings[i + 1];
+    }
+    // add the missing frames
+    var old_last_frame = self.lemmings[self.lemmings.length - 2].frame;
+    var sprite = new chem.Sprite('lem_crazy', {
+      batch: self.batch_level,
+      zOrder: self.group_char,
+    });
+    var frame = new LemmingFrame(old_last_frame.pos.clone(), old_last_frame.vel.clone(), null, null, old_last_frame.on_ladder);
+    var last_lem = new Lemming(sprite, frame);
+    self.lemmings[self.lemmings.length - 1] = last_lem;
+    last_lem.sprite.alpha = 0.5;
+    var node = last_lem.frame;
+    for (var i = 0; i < Math.floor(TARGET_FPS * LEMMING_RESPONSE_TIME); i += 1) {
+      node = new LemmingFrame(old_last_frame.pos.clone(), old_last_frame.vel.clone(), node, null, old_last_frame.on_ladder);
+    }
+    old_last_frame.next_node = node;
+    node.prev_node = old_last_frame;
+  }
+
+  // lemming trails
+  var char = null;
+  if (self.control_lemming < self.lemmings.length) {
+    char = self.lemmings[self.control_lemming];
+    char.frame = new LemmingFrame(char.frame.pos.clone(), char.frame.vel.clone(), char.frame, null, char.frame.on_ladder);
+
+    for (var i = self.control_lemming + 1; i < self.lemmings.length; i += 1) {
+      var lemming = self.lemmings[i];
+      lemming.frame = lemming.frame.prev_node;
+    }
+    self.lemmings[self.lemmings.length - 1].frame.next_node = null;
+
+    char.pos = char.frame.pos;
+    char.vel = char.frame.vel;
+    char.on_ladder = char.frame.on_ladder;
+  }
+
+  // scroll the level
+  if (char != null) {
+    var desired_scroll;
+    if (self.held_by == null) {
+      desired_scroll = self.getDesiredScroll(char.pos.clone());
+    } else {
+      desired_scroll = self.getDesiredScroll(self.held_by.pos.clone());
+    }
+    var scroll_diff = desired_scroll.minus(self.scroll);
+    self.scroll.add(scroll_diff.scale(0.20));
+  }
+
+  // physics
+  self.physical_objects.forEach(doPhysics);
+  doPhysics(char);
+
+  if (char != null) {
+    char.frame.pos = char.pos;
+    char.frame.vel = char.vel;
+    char.frame.on_ladder = char.on_ladder;
+  }
+
+  // prepare sprites for drawing
+  // physical objects
+  self.physical_objects.forEach(prepareObjSprite);
+
+  // lemmings
+  for (var i = self.control_lemming; i < self.lemmings.length; i += 1) {
+    var lemming = self.lemmings[i];
+    if (lemming.frame.new_image != null) {
+      debugger; // is this right?
+      lemming.sprite.setAnimation(lemming.frame.new_image)
+    }
+    // TODO: double check - it relies on animation offset
+    lemming.sprite.pos = lemming.frame.pos.plus(
+        self.animation_offset[lemming.sprite.animationName]);
+  }
+
+  function prepareObjSprite(obj) {
+    if (obj.gone) return;
+    var offset = self.animation_offset[obj.sprite.animationName];
+    if (offset == null) offset = new Vec2d(0, 0);
+    obj.sprite.pos = obj.pos.plus(offset);
+  }
+
+  function doPhysics(obj) {
+    if (obj == null || obj.gone) return;
+    obj.think(dt);
+
+    if (obj === char && self.held_by != null) return;
+
+    if (obj.life != null) {
+      obj.life -= dt;
+      if (obj.life <= 0) {
+        obj.delete();
+        return;
+      }
+    }
+
+    var apply_belt_velocity = 0;
+
+    // collision with solid blocks
+    if (obj.vel.x !== 0 || obj.vel.y !== 0) {
+      var new_pos = obj.pos.plus(obj.vel.scaled(dt));
+      function resolve_y(new_pos, vel, obj_size) {
+        // TODO port this
+      }
+      function resolve_x(new_pos, vel, obj_size) {
+        // TODO port this
+      }
+      // find the blocks that we would have passed through and do collision
+      // resolution on them, in order
+      var vector_it = obj.pos.clone();
+      var unit_vector_vel = obj.vel.normalized();
+      var last_one = false;
+      while (! last_one) {
+        // TODO port this
+      }
+      // apply velocity to position
+      obj.pos = new_pos;
+    }
+    var corner_foot_block = new Vec2d(obj.pos.x, obj.pos.y - 1).divBy(tile_size).floor();
+    var blocks_at_feet = [];
+    for (var x = 0; x < obj.size.x; x += 1) {
+      blocks_at_feet.push(new Vec2d(corner_foot_block.x+x, corner_foot_block.y));
+    }
+    if (Math.floor(obj.pos.x / self.level.tilewidth) !==
+        Math.floor(Math.round(obj.pos.x / self.level.tilewidth)))
+    {
+      blocks_at_feet.push(new Vec2d(
+          blocks_at_feet[blocks_at_feet.length - 1].x + 1, 
+          blocks_at_feet[blocks_at_feet.length - 1].y));
+    }
+    var tiles_at_feet = blocks_at_feet.map(function(block) {
+      return self.getTile(block);
+    });
+    var blocks_at_feet_solid = blocks_at_feet.map(function(block) {
+      return self.getBlockIsSolid(block);
+    });
+    var on_ground = blocks_at_feet_solid.some(function(isSolid) {
+      return isSolid;
+    });
+
+    if (! on_ground && ! obj.on_ladder) self.setRunningSound(null);
+
+    if (obj.can_pick_up_stuff) {
+      // TODO port this
+    }
+
+    var belt_velocity = 800;
+    tiles_at_feet.forEach(function(tile) {
+      if (tile.belt == null) return;
+      apply_belt_velocity += tile.belt * belt_velocity * dt;
+    });
+
+    if (obj === char) {
+      // TODO: port this
+    }
+
+    // gravity
+    var gravity_accel = 800;
+    if (! on_ground && ! obj.on_ladder) {
+      obj.vel.y -= gravity_accel * dt;
+    }
+
+    // friction
+    var friction_accel = 380;
+    if (on_ground) {
+      if (Math.abs(obj.vel.x) < Math.abs(friction_accel * dt)) {
+        obj.vel.x = 0;
+      } else {
+        obj.vel.x += friction_accel * dt * -sign(obj.vel.x);
+      }
+    }
+
+    // conveyor belts
+    var max_conveyor_speed = 700;
+    apply_belt_velocity = Math.max(-belt_velocity * dt, apply_belt_velocity);
+    apply_belt_velocity = Math.min(belt_velocity * dt, apply_belt_velocity);
+    if (apply_belt_velocity > 0) {
+      // TODO: port the rest
+    } else if (apply_belt_velocity < 0) {
+      // TODO: port the rest
+    }
+
+    if (on_ground && obj.vel.lengthSqrd() === 0 && obj.is_belly_flop) {
+      // TODO: port this
+    }
+  }
 };
 
 LevelPlayer.prototype.on_draw = function(context) {
@@ -981,8 +1235,17 @@ LevelPlayer.prototype.getBlockIsSolid = function(block_pos) {
   return false;
 };
 
-LevelPlayer.prototype.setTile = function(block_pos, tile_Id) {
-  // TODO: port this function
+LevelPlayer.prototype.setTile = function(block_pos, tile_id) {
+  this.level.layers[0].content2D[block_pos.x][block_pos.y] = tile_id;
+  var new_sprite = null;
+  if (tile_id !== 0) {
+    new_sprite = new chem.Sprite(this.level.indexed_tiles[tile_id][2], {
+      pos: new Vec2d(this.level.tilewidth * block_pos.x, this.level.tileheight * block_pos.y),
+      batch: this.batch_level,
+      zOrder: this.layer_group[0],
+    });
+  }
+  this.sprites[0][block_pos.x][block_pos.y] = new_sprite;
 };
 
 LevelPlayer.prototype.garbage_collect = function(dt) {
