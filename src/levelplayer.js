@@ -895,6 +895,7 @@ LevelPlayer.prototype.handleVictory = function() {
 
 LevelPlayer.prototype.update = function(dt, dx) {
   var self = this;
+  var char;
   // handle control input
   if (self.game.engine.buttonJustPressed(self.controls[Control.Explode])) {
     self.explode_queued = true;
@@ -903,7 +904,7 @@ LevelPlayer.prototype.update = function(dt, dx) {
     if (self.held_by != null) {
       self.bellyflop_queued = true;
     } else {
-      var char = self.lemmings[self.control_lemming];
+      char = self.lemmings[self.control_lemming];
       // TODO: wtf is level.tilewidth
       var pos_at_feet = new Vec2d(char.frame.pos.x + self.level.tilewidth / 2, char.frame.pos.y - 1);
       var block_at_feet = pos_at_feet.divBy(tile_size).floor();
@@ -916,6 +917,9 @@ LevelPlayer.prototype.update = function(dt, dx) {
     self.freeze_queued = true;
   }
 
+  var sprite;
+  var i;
+  var lemming;
   self.label_mans.text = (self.lemmings.length - self.control_lemming).toString();
   var old_head_lemming;
   if (self.control_lemming < self.lemmings.length) {
@@ -951,24 +955,14 @@ LevelPlayer.prototype.update = function(dt, dx) {
       var size = new Vec2d(3, 1);
       var shift = 0;
       var obj_pos = new Vec2d(old_head_lemming.frame.pos.x, old_head_lemming.frame.pos.y);
-      var sprite = new chem.Sprite(animationName, {
+      sprite = new chem.Sprite(animationName, {
         batch: self.batch_level,
         zOrder: self.group_fg,
       });
       var obj = new PhysicsObject(obj_pos, old_head_lemming.frame.vel, sprite,
           size, undefined, true, true, direction);
       // shift it left until not in wall
-      function inWall() {
-        var it = new Vec2d(0, 0);
-        for (it.x = 0; it.x < size.x; it.x += 1) {
-          for (it.y = 0; it.y < size.y; it.y += 1) {
-            var block = obj.pos.divBy(tile_size).apply(Math.round).floor().plus(it);
-            if (self.getBlockIsSolid(block)) return true;
-          }
-        }
-        return false;
-      }
-      while inWall() {
+      while (inWall(self, obj, size)) {
         obj.pos.x -= self.level.tilewidth;
       }
       self.physical_objects.push(obj);
@@ -981,12 +975,12 @@ LevelPlayer.prototype.update = function(dt, dx) {
   while (self.plus_ones_queued > 0 && self.control_lemming > 0) {
     self.plus_ones_queued -= 1;
     self.control_lemming -= 1;
-    for (var i = self.control_lemming; i < self.lemmings.length - 1; i += 1) {
+    for (i = self.control_lemming; i < self.lemmings.length - 1; i += 1) {
       self.lemmings[i] = self.lemmings[i + 1];
     }
     // add the missing frames
     var old_last_frame = self.lemmings[self.lemmings.length - 2].frame;
-    var sprite = new chem.Sprite('lem_crazy', {
+    sprite = new chem.Sprite('lem_crazy', {
       batch: self.batch_level,
       zOrder: self.group_char,
     });
@@ -995,7 +989,7 @@ LevelPlayer.prototype.update = function(dt, dx) {
     self.lemmings[self.lemmings.length - 1] = last_lem;
     last_lem.sprite.alpha = 0.5;
     var node = last_lem.frame;
-    for (var i = 0; i < Math.floor(TARGET_FPS * LEMMING_RESPONSE_TIME); i += 1) {
+    for (i = 0; i < Math.floor(TARGET_FPS * LEMMING_RESPONSE_TIME); i += 1) {
       node = new LemmingFrame(old_last_frame.pos.clone(), old_last_frame.vel.clone(), node, null, old_last_frame.on_ladder);
     }
     old_last_frame.next_node = node;
@@ -1003,13 +997,13 @@ LevelPlayer.prototype.update = function(dt, dx) {
   }
 
   // lemming trails
-  var char = null;
+  char = null;
   if (self.control_lemming < self.lemmings.length) {
     char = self.lemmings[self.control_lemming];
     char.frame = new LemmingFrame(char.frame.pos.clone(), char.frame.vel.clone(), char.frame, null, char.frame.on_ladder);
 
-    for (var i = self.control_lemming + 1; i < self.lemmings.length; i += 1) {
-      var lemming = self.lemmings[i];
+    for (i = self.control_lemming + 1; i < self.lemmings.length; i += 1) {
+      lemming = self.lemmings[i];
       lemming.frame = lemming.frame.prev_node;
     }
     self.lemmings[self.lemmings.length - 1].frame.next_node = null;
@@ -1046,8 +1040,8 @@ LevelPlayer.prototype.update = function(dt, dx) {
   self.physical_objects.forEach(prepareObjSprite);
 
   // lemmings
-  for (var i = self.control_lemming; i < self.lemmings.length; i += 1) {
-    var lemming = self.lemmings[i];
+  for (i = self.control_lemming; i < self.lemmings.length; i += 1) {
+    lemming = self.lemmings[i];
     if (lemming.frame.new_image != null) {
       debugger; // is this right?
       lemming.sprite.setAnimation(lemming.frame.new_image)
@@ -1083,19 +1077,38 @@ LevelPlayer.prototype.update = function(dt, dx) {
     // collision with solid blocks
     if (obj.vel.x !== 0 || obj.vel.y !== 0) {
       var new_pos = obj.pos.plus(obj.vel.scaled(dt));
-      function resolve_y(new_pos, vel, obj_size) {
-        // TODO port this
-      }
-      function resolve_x(new_pos, vel, obj_size) {
-        // TODO port this
-      }
       // find the blocks that we would have passed through and do collision
       // resolution on them, in order
       var vector_it = obj.pos.clone();
       var unit_vector_vel = obj.vel.normalized();
       var last_one = false;
       while (! last_one) {
-        // TODO port this
+        vector_it.add(unit_vector_vel.scaled(tile_size));
+        if (obj.pos.distanceSqrd(new_pos) < obj.pos.distanceSqrd(vector_it)) {
+          last_one = true;
+          vector_it = new_pos;
+        }
+
+        // try resolving the collision both ways (y then x, x then y) and choose the one that results in the most velocity
+        var x_first_new_pos = vector_it.clone();
+        var x_first_new_vel = obj.vel.clone();
+        var did_x = resolve_x(self, obj, x_first_new_pos, x_first_new_vel, obj.size);
+        var did_y = resolve_y(self, obj, x_first_new_pos, x_first_new_vel, obj.size);
+
+        if (did_x || did_y) {
+          var y_first_new_pos = vector_it.clone();
+          var y_first_new_vel = obj.vel.clone();
+          resolve_y(self, obj, y_first_new_pos, y_first_new_vel, obj.size);
+          resolve_x(self, obj, y_first_new_pos, y_first_new_vel, obj.size);
+          if (x_first_new_vel.lengthSqrd() > y_first_new_vel.lengthSqrd()) {
+            new_pos = x_first_new_pos;
+            obj.vel = x_first_new_vel;
+          } else {
+            new_pos = y_first_new_pos;
+            obj.vel = y_first_new_vel;
+          }
+          break;
+        }
       }
       // apply velocity to position
       obj.pos = new_pos;
@@ -1109,7 +1122,7 @@ LevelPlayer.prototype.update = function(dt, dx) {
         Math.floor(Math.round(obj.pos.x / self.level.tilewidth)))
     {
       blocks_at_feet.push(new Vec2d(
-          blocks_at_feet[blocks_at_feet.length - 1].x + 1, 
+          blocks_at_feet[blocks_at_feet.length - 1].x + 1,
           blocks_at_feet[blocks_at_feet.length - 1].y));
     }
     var tiles_at_feet = blocks_at_feet.map(function(block) {
@@ -1169,6 +1182,103 @@ LevelPlayer.prototype.update = function(dt, dx) {
     }
   }
 };
+
+function inWall(self, obj, size) {
+  var it = new Vec2d(0, 0);
+  for (it.x = 0; it.x < size.x; it.x += 1) {
+    for (it.y = 0; it.y < size.y; it.y += 1) {
+      var block = obj.pos.divBy(tile_size).apply(Math.round).floor().plus(it);
+      if (self.getBlockIsSolid(block)) return true;
+    }
+  }
+  return false;
+}
+
+function resolve_x(self, obj, new_pos, vel, obj_size) {
+  if (obj.on_ladder) return false;
+
+  var y;
+  var new_feet_block;
+  var new_body_block;
+  var block_solid;
+  if (vel.x < 0) {
+    new_feet_block = new_pos.divBy(tile_size).floor();
+    for (y = 0; y < obj_size.y; y += 1) {
+      new_body_block = new Vec2d(new_feet_block.x, new_feet_block.y + y);
+      block_solid = self.getBlockIsSolid(new_body_block);
+      if (block_solid) {
+        new_pos.x = (new_feet_block.x+1)*self.level.tilewidth;
+        vel.x = 0;
+        return true;
+      }
+    }
+  } else if (vel.x > 0) {
+    new_feet_block = new_pos.divBy(tile_size).floor();
+    for (y = 0; y < obj_size.y; y += 1) {
+      new_body_block = new Vec2d(new_feet_block.x+obj_size.x, new_feet_block.y + y);
+      block_solid = self.getBlockIsSolid(new_body_block);
+      if (block_solid) {
+        new_pos.x = new_feet_block.x * self.level.tilewidth;
+        vel.x = 0;
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function resolve_y(self, obj, new_pos, vel, obj_size) {
+  if (obj.on_ladder) return false;
+
+  var new_feet_block = new_pos.divBy(tile_size).floor();
+  var tile_there = self.getTile(new_feet_block);
+
+  // ramps
+  if (tile_there.ramp === -1) {
+    new_pos.y = new_feet_block.y * self.level.tileheight + self.level.tileheight;
+  } else if (self.getTile(new Vec2d(new_feet_block.x+1, new_feet_block.y)).ramp === 1) {
+    new_pos.y = new_feet_block.y * self.level.tileheight + self.level.tileheight;
+  }
+
+  var x;
+  if (vel.y > 0) {
+    // resolve head collisions
+    for (x = 0; x < obj_size.x; x += 1) {
+      var new_head_block = new Vec2d(new_feet_block.x + x, new_feet_block.y + obj_size.y);
+      var block_solid = self.getBlockIsSolid(new_head_block);
+      if (block_solid) {
+        new_pos.y = new_feet_block.y * self.level.tileheight;
+        vel.y = 0;
+        return true;
+      }
+    }
+  } else if (vel.y < 0) {
+    // resolve feet collisions
+    var new_blocks_at_feet = [];
+    for (x = 0; x < obj.size.x; x += 1) {
+      new_blocks_at_feet.push(new Vec2d(new_feet_block.x+x, new_feet_block.y));
+    }
+    if (Math.floor(new_pos.x / self.level.tilewidth) !==
+        Math.floor(Math.round(new_pos.x / self.level.tilewidth)))
+    {
+      new_blocks_at_feet.push(new Vec2d(
+            new_blocks_at_feet[new_blocks_at_feet.length-1].x+1,
+            new_blocks_at_feet[new_blocks_at_feet.length-1].y));
+    }
+    var new_blocks_at_feet_solid = new_blocks_at_feet.map(function(block) {
+      return self.getBlockIsSolid(block);
+    });
+    var anyAreSolid = new_blocks_at_feet_solid.some(function(isSolid) {
+      return isSolid;
+    });
+    if (anyAreSolid) {
+      new_pos.y = (new_feet_block.y+1)*self.level.tileheight;
+      vel.y = 0;
+      return true;
+    }
+  }
+  return false;
+}
 
 LevelPlayer.prototype.on_draw = function(context) {
   // far background
