@@ -1173,13 +1173,27 @@ LevelPlayer.prototype.update = function(dt, dx) {
     apply_belt_velocity = Math.max(-belt_velocity * dt, apply_belt_velocity);
     apply_belt_velocity = Math.min(belt_velocity * dt, apply_belt_velocity);
     if (apply_belt_velocity > 0) {
-      // TODO: port the rest
+      if (obj.vel.x + apply_belt_velocity > max_conveyor_speed) {
+        obj.vel.x += Math.max(max_conveyor_speed - obj.vel.x, 0);
+      } else {
+        obj.vel.x += apply_belt_velocity;
+      }
     } else if (apply_belt_velocity < 0) {
-      // TODO: port the rest
+      if (obj.vel.x + apply_belt_velocity < -max_conveyor_speed) {
+        obj.vel.x += Math.min(-max_conveyor_speed - obj.vel.x, 0);
+      } else {
+        obj.vel.x += apply_belt_velocity;
+      }
     }
 
     if (on_ground && obj.vel.lengthSqrd() === 0 && obj.is_belly_flop) {
-      // TODO: port this
+      // replace tiles it took up with dead body
+      var mid_block = obj.pos.divBy(tile_size).apply(Math.round).floor();
+      self.setTile(mid_block.offset(0, 0), self.tiles.enum.DeadBodyLeft);
+      self.setTile(mid_block.offset(1, 0), self.tiles.enum.DeadBodyMiddle);
+      self.setTile(mid_block.offset(2, 0), self.tiles.enum.DeadBodyRight);
+
+      obj.delete();
     }
   }
 };

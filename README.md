@@ -8,7 +8,7 @@ using the [chem game engine](https://github.com/superjoe30/chem/).
 
 ## Status
 
-About 70% done porting.
+About 80% done porting.
 
 ## Developing
 
