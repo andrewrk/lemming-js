@@ -1138,7 +1138,8 @@ LevelPlayer.prototype.update = function(dt, dx) {
     if (! on_ground && ! obj.on_ladder) self.setRunningSound(null);
 
     if (obj.can_pick_up_stuff) {
-      // TODO port this
+      doItemPickups(self, obj, tiles_at_feet, char, corner_foot_block,
+          blocks_at_feet);
     }
 
     var belt_velocity = 800;
@@ -1148,7 +1149,7 @@ LevelPlayer.prototype.update = function(dt, dx) {
     });
 
     if (obj === char) {
-      // TODO: port this
+      applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt);
     }
 
     // gravity
@@ -1182,6 +1183,233 @@ LevelPlayer.prototype.update = function(dt, dx) {
     }
   }
 };
+
+function doItemPickups(self, obj, tiles_at_feet, char, corner_foot_block,
+    blocks_at_feet)
+{
+  var corner_block = obj.pos.divBy(tile_size).apply(Math.Round).floor();
+  var feet_block = obj.pos.plus(tile_size.scaled(0.5)).divBy(tile_size).apply(Math.round).floor();
+  var it = new Vec2d(0, 0);
+  for (it.y = 0; it.y < obj.size.y; it.y += 1) {
+    for (it.x = 0; it.x < obj.size.x; it.x += 1) {
+      var block = corner_block.plus(it);
+      var tile = self.getTile(block);
+
+      // +1
+      if (self.control_lemming - self.plus_ones_queued > 0) {
+        if (tile.id === self.tiles.enum.PlusOne) {
+          self.plus_ones_queued += 1;
+          self.setTile(block, self.tiles.enum.Air);
+          var sfx_player = self.playSoundAt('coin_pickup', block.times(tile_size));
+          sfx_player.playbackRate = 2 - (self.lemmings.length - self.control_lemming - 1) / self.lemmings.length;
+        } else if (tile.id === self.tiles.enum.PlusForever) {
+          self.plus_ones_queued = self.control_lemming;
+          self.playSoundAt('coin_pickup', block.times(tile_size));
+        }
+      }
+
+      // land mine
+      if (tile.mine) {
+        if (obj === char) {
+          self.explode_queued = true;
+        } else {
+          self.handleExplosion(block.times(tile_size), new Vec2d(0, 0));
+          obj.delete();
+        }
+        self.setTile(block, self.tiles.enum.Air);
+        self.playSoundAt('mine_beep', block.times(tile_size));
+      }
+
+      // buttons
+      var button_to_activate = self.buttons[block.toString()];
+      if (button_to_activate != null) button_to_activate.hit(obj);
+
+      // victory
+      if (self.isVictory(block) && ! self.handled_victory) {
+        self.handled_victory = true;
+        self.handleVictory();
+      }
+    }
+  }
+
+  // spikes
+  var anyIsSpike = tiles_at_feet.some(function(tile) {
+    return tile.spike;
+  });
+  if (anyIsSpike) {
+    if (obj === char) {
+      self.detach_queued = true;
+    } else {
+      obj.delete();
+    }
+    if (obj.is_belly_flop) {
+      self.setTile(corner_foot_block, self.tiles.enum.DeadBodyLeft);
+      self.setTile(corner_foot_block.offset(1, 0), self.tiles.enum.DeadBodyMiddle);
+      self.setTile(corner_foot_block.offset(2, 0), self.tiles.enum.DeadBodyRight);
+    } else {
+      self.setTile(corner_foot_block, self.tiles.enum.DeadBodyMiddle);
+
+      if (blocks_at_feet.length > obj.size.x) {
+        self.setTile(corner_foot_block.offset(1, 0), self.tiles.enum.DeadBodyMiddle);
+      }
+
+      // TODO minus thing
+      var negate = "";
+      if (obj.vel.x < 0) negate = '-';
+      var sprite = new chem.Sprite(negate+'lem_die', {
+        batch: self.batch_level,
+        zOrder: self.group_fg,
+      });
+      var new_obj = new PhysicsObject(obj.pos, new Vec2d(0, 0), sprite,
+          obj.size, chem.resources.animations.lem_die.duration);
+      self.physical_objects.append(new_obj);
+    }
+    self.playSoundAt('spike_death', corner_foot_block.times(tile_size));
+    self.spawnGoreExplosion(obj.pos, obj.vel, obj.size);
+  }
+}
+
+function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
+  var acceleration = 900;
+  var max_speed = 200;
+  var move_left = self.game.engine.buttonState(self.controls[Control.MoveLeft]);
+  var move_right = self.game.engine.buttonState(self.controls[Control.MoveRight]);
+  var move_up = self.game.engine.buttonState(self.controls[Control.MoveUp]);
+  var move_down = self.game.engine.buttonState(self.controls[Control.MoveDown]);
+  if (!move_up && (move_left || move_right || move_down)) {
+    obj.on_ladder = false;
+  }
+  var ladder_at_feet = self.getTile(corner_foot_block, 1);
+  if (obj.on_ladder && !ladder_at_feet.ladder) {
+    obj.on_ladder = false;
+  }
+  if (move_left && !move_right) {
+    if (obj.vel.x - acceleration * dt < -max_speed) {
+      obj.vel.x += Math.min(-max_speed - obj.vel.x, 0);
+    } else {
+      obj.vel.x -= acceleration * dt;
+    }
+
+    // switch sprite to running left
+    if (on_ground) {
+      // TODO minus thing
+      if (obj.sprite.animationName !== '-lem_run') {
+        obj.sprite.setAnimationName('-lem_run');
+        // TODO new_image thing
+        obj.frame.new_image = obj.sprite.image;
+
+        self.setRunningSound(self.running_audio);
+      }
+    }
+  } else if (move_right && !move_left) {
+    if (obj.vel.x + acceleration * dt > max_speed) {
+      obj.vel.x += Math.max(max_speed - obj.vel.x, 0);
+    } else {
+      obj.vel.x += acceleration * dt;
+    }
+
+    // switch sprite to running right
+    if (on_ground) {
+      if (obj.sprite.animationName !== 'lem_run') {
+        obj.sprite.setAnimationName('lem_run');
+        // TODO new_image thing
+        obj.frame.new_image = obj.sprite.image;
+
+        self.setRunningSound(self.running_audio);
+      }
+    }
+  } else if (on_ground) {
+    // switch sprite to still
+    if (obj.sprite.animationName !== 'lem_crazy') {
+      obj.sprite.setAnimationName('lem_crazy');
+      debugger; // TODO new_image wtf? sprite.image wtf?
+      obj.frame.new_image = obj.sprite.image;
+
+      self.setRunningSound(null);
+    }
+  }
+  var ladder_velocity = 200;
+  var new_pos;
+  var new_pos_grid;
+  if (move_up && ladder_at_feet.ladder) {
+    new_pos = new Vec2d(obj.pos.x, obj.pos.y + ladder_velocity * dt);
+    new_pos_grid = new_pos.divBy(tile_size).floor();
+
+    if (! self.getTile(new_pos_grid, 1).ladder) {
+      obj.pos.y = new_pos_grid.y * self.level.tileheight;
+      obj.on_ladder = false;
+    } else {
+      obj.on_ladder = true;
+      obj.vel.y = 0;
+      obj.vel.x = 0;
+      obj.pos.y += ladder_velocity * dt;
+
+      // switch sprite to ladder
+      if (obj.sprite.animationName !== 'lem_climb') {
+        obj.sprite.setAnimationName('lem_climb');
+        // TODO new_image wtf
+        obj.frame.new_image = obj.sprite.image;
+
+        self.setRunningSound(self.ladder_audio);
+      }
+    }
+  } else if (move_down && ladder_at_feet.ladder) {
+    new_pos = new Vec2d(obj.pos.x, obj.pos.y - ladder_velocity * dt);
+    new_pos_grid = new_pos.divBy(tile_size).floor();
+
+    if (self.getBlockIsSolid(new_pos_grid) &&
+        !self.getTile(new_pos_grid, 1).ladder)
+    {
+      obj.pos.y = (new_pos_grid.y + 1) * self.level.tileheight;
+      obj.on_ladder = false;
+    } else {
+      obj.on_ladder = true;
+      obj.vel.x = 0;
+      obj.pos.y -= ladder_velocity * dt;
+
+      // switch sprite to ladder
+      if (obj.sprite.animationName !== 'lem_climb') {
+        obj.sprite.setAnimationName('lem_climb');
+        // TODO new_image wtf
+        obj.frame.new_image = obj.sprite.image;
+
+        self.setRunningSound(self.ladder_audio);
+      }
+    }
+  }
+
+  if (move_up && on_ground && !obj.on_ladder) {
+    var jump_velocity = 350;
+    obj.vel.y = jump_velocity;
+
+    // switch sprite to jump
+    var animation_name = 'lem_jump';
+    if (obj.vel.x < 0) {
+      // TODO minus thing
+      animation_name = '-' + animation_name;
+    }
+    if (obj.sprite.animationName !== animation_name) {
+      obj.sprite.setAnimationName(animation_name);
+      // TODO new_image wtf?
+      obj.frame.new_image = obj.sprite.image;
+
+      self.playSoundAt('jump', obj.pos);
+      self.setRunningSound(null);
+    }
+  } else {
+    self.jump_scheduled = false;
+  }
+  if (obj.on_ladder && (! move_up && !move_down)) {
+    // switch sprite to ladder, still
+    if (obj.sprite.animationName !== 'lem_climb_still') {
+      obj.sprite.setAnimationName('lem_climb_still');
+      // TODO new_image wtf?
+      obj.frame.new_image = obj.sprite.image;
+
+      self.setRunningSound(null);
+    }
+  }
+}
 
 function inWall(self, obj, size) {
   var it = new Vec2d(0, 0);
