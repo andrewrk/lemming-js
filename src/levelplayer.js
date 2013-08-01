@@ -1617,7 +1617,90 @@ LevelPlayer.prototype.hitButtonId = function(button_id) {
 };
 
 LevelPlayer.prototype.load = function() {
-  // TODO: port this function
+  var self = this;
+
+  // TODO implement tmx and make sure the interface works everywhere
+  self.level = tmx.parse(self.level_fd);
+  tile_size = new Vec2d(self.level.tilewidth, self.level.tileheight);
+
+  self.loadImages();
+  self.loadSoundEffects();
+
+  self.tiles = new TileSet(self.level.tile_sets[0]);
+
+  // load tiles into sprites
+  self.next_group_num = 0;
+  self.group_bg2 = self.getNextGroupNum();
+  self.group_bg1 = self.getNextGroupNum();
+
+  self.sprites = []; // [layer][x][y]
+  for (var i = 0; i < self.level.layers.length; i += 1) {
+    var layer = self.level.layers[i];
+    self.sprites.push([]);
+    for (var x = 0; x < layer.width; x += 1) {
+      self.sprites[i].push([]);
+      for (var y = 0; y < layer.height; y += 1) {
+        self.sprites[i][x].push(null);
+      }
+    }
+  }
+
+  self.layer_group = [];
+
+  for (var layer_index = 0; layer_index < self.level.layers.length; layer_index += 1)
+  {
+    var group = self.getNextGroupNum();
+    self.layer_group.push(group);
+    for (var xtile = 0; xtile < layer.width; xtile += 1) {
+      layer.content2D[xtile].reverse();
+    }
+    for (var ytile = 0; ytile < layer.height; ytile += 1) {
+      // To compensate for pyglet's upside-down y-axis, the Sprites are
+      // placed in rows that are backwards compared to what was loaded
+      // into the map. The next operation puts all rows upside-down.
+
+      // now that we are using chem, the Y-axis is no longer fucked.
+      // but it's probably harder to refactor all the physics and
+      // calculations than it is to mess with the sprites right before display.
+      // So I'm going to leave this shit in here for now.
+
+      // TODO: port the rest
+    }
+    // TODO: port the rest
+  }
+
+  var had_player_layer = false;
+  var had_start_point = false;
+
+  function translate_y(y, obj_height) {
+    obj_height = obj_height == null ? 0 : obj_height;
+    return self.level.height * self.level.tileheight - y - obj_height;
+  }
+
+  self.labels = [];
+  self.obj_sprites = {};
+
+  self.level.object_groups.forEach(function(obj_group) {
+    // TODO: port the rest
+  });
+
+  if (! had_start_point) {
+    throw new Error("Level missing start point");
+  }
+
+  if (! had_player_layer) {
+    console.log("Level was missing PlayerLayer");
+    self.group_char = self.getNextGroupNum();
+  }
+  self.group_fg = self.getNextGroupNum();
+
+  // load bg music
+  var bg_music_src = self.level.properties.bg_music;
+  if (bg_music_src) {
+    self.bg_music = new Audio(bg_music_src);
+    self.bg_music.loop = true;
+    self.bg_music.play();
+  }
 };
 
 LevelPlayer.prototype.isVictory = function(block) {
