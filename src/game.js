@@ -57,8 +57,6 @@ Game.prototype.setScreenToCurrentLevel = function() {
   if (this.current_level >= levels.length) {
     this.current_screen = new winscreen.WinScreen(this);
   } else {
-    // TODO: make sure this is loaded properly
-    // because we're passing a string instead of a file descriptor
     this.current_screen = new levelplayer.LevelPlayer(this, levels[this.current_level]);
   }
 };
@@ -68,8 +66,6 @@ Game.prototype.startPlaying = function() {
   if (this.level_filename == null) {
     this.setScreenToCurrentLevel();
   } else {
-    // TODO: make sure this is loaded properly
-    // because we're passing a string instead of a file descriptor
     this.current_screen = new levelplayer.LevelPlayer(this, this.level_filename);
   }
   this.current_screen.start();
@@ -82,8 +78,6 @@ Game.prototype.start = function(level_filename) {
   if (self.level_filename == null) {
     self.current_screen = new mainmenu.MainMenu(this);
   } else {
-    // TODO: make sure this is loaded properly
-    // because we're passing a string instead of a file descriptor
     self.current_screen = new levelplayer.LevelPlayer(this, level_filename);
   }
   self.current_screen.start();

@@ -6,7 +6,17 @@
     "dev": "npm install && chem dev"
   },
   "dependencies": {
-    "chem-cli": "~0.5.2",
-    "chem": "~0.5.0"
+    "chem-cli": "~1.0.8",
+    "chem": "~3.0.0",
+    "chem-tmx": "0.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/superjoe30/lemming-js.git"
+  },
+  "author": "Andrew Kelley <superjoe30@gmail.com>",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/superjoe30/lemming-js/issues"
   }
 }

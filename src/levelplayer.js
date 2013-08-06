@@ -1,8 +1,9 @@
-var TileSet = require('./tiles').TileSet;
 var chem = require('chem');
 var Vec2d = chem.vec2d.Vec2d;
+var ani = chem.resources.animations;
 var util = require('util');
 var modulus = require('./euclidean_mod');
+var tmx = require('chem-tmx');
 
 function sign(n) {
   if (n > 0) {
@@ -122,7 +123,7 @@ Tank.prototype.changeDirection = function(new_dir) {
   } else {
     return;
   }
-  this.sprite.setAnimationName(name);
+  this.sprite.setAnimation(ani[name]);
 };
 
 Tank.prototype.wantToShoot = function() {
@@ -144,7 +145,7 @@ Tank.prototype.wantToShoot = function() {
   } else {
     return;
   }
-  self.sprite.setAnimationName(name);
+  self.sprite.setAnimation(ani[name]);
 
   function recharge() {
     self.can_shoot = true;
@@ -152,7 +153,7 @@ Tank.prototype.wantToShoot = function() {
 };
 
 function Gunner(pos, size, group, batch, game) {
-  var sprite = new chem.Sprite("gunner_still", {
+  var sprite = new chem.Sprite(ani.gunner_still, {
     pos: pos.clone(),
     zOrder: group,
     batch: batch,
@@ -206,7 +207,7 @@ Gunner.prototype.wantToShoot = function() {
 
   // TODO minus thing
   var name = self.direction < 0 ? '-gunner_shoot' : 'gunner_shoot';
-  self.sprite.setAnimationName(name);
+  self.sprite.setAnimation(ani[name]);
 
   function recharge() {
     self.can_shoot = true;
@@ -225,7 +226,7 @@ Gunner.prototype.changeDirection = function(new_dir) {
   } else {
     name = 'gunner_still';
   }
-  this.sprite.setAnimationName(name);
+  this.sprite.setAnimation(ani[name]);
 };
 
 function Bomb(pos, vel, fuse, sprite, game) {
@@ -297,7 +298,7 @@ Bullet.prototype.think = function(dt) {
 function Monster(pos, size, group, batch, game, direction, throw_vel) {
   // TODO - flip the sprite instead of using minus sign
   var negate = direction > 0 ? '' : '-';
-  var sprite = new chem.Sprite(negate+'monster_still', {
+  var sprite = new chem.Sprite(ani[negate+'monster_still'], {
     pos: pos.clone(),
     zOrder: group,
     batch: batch,
@@ -350,8 +351,8 @@ function ConveyorBelt(pos, size, sprite, game, state, direction) {
   // reversed because animation is backwards
   // TODO flip sprite instead of minus thing
   this.animations = {
-    '-1': 'belt_on',
-    '1': '-belt_on',
+    '-1': ani['belt_on'],
+    '1': ani['-belt_on'],
   };
   this.toggle();
   this.toggle();
@@ -363,14 +364,14 @@ ConveyorBelt.prototype.toggle = function() {
   var new_tile;
   if (this.state) {
     // TODO minus thing
-    this.sprite.setAnimationName(this.animations[this.direction]);
+    this.sprite.setAnimation(this.animations[this.direction]);
     this.setCorrectPosition();
 
-    new_tile = this.direction > 0 ? this.game.tiles.enum.BeltRight : this.game.tiles.enum.BeltLeft;
+    new_tile = this.direction > 0 ? this.game.tilesEnum.BeltRight : this.game.tilesEnum.BeltLeft;
   } else {
-    this.sprite.setAnimationName('belt_off');
+    this.sprite.setAnimation(ani.belt_off);
     this.setCorrectPosition();
-    new_tile = this.game.tiles.enum.SolidInvisible;
+    new_tile = this.game.tilesEnum.SolidInvisible;
   }
   var it = new Vec2d(0, 0);
   for (it.x = 0; it.x < this.size.x; it.x += 1) {
@@ -430,11 +431,11 @@ TrapDoor.prototype.toggle = function() {
   if (this.state === 'closed') {
     this.state = 'open';
     this.sprite.visible = false;
-    new_tile = this.game.tiles.enum.Air;
+    new_tile = this.game.tilesEnum.Air;
   } else {
     this.state = 'closed';
     this.sprite.visible = true;
-    new_tile = this.game.tiles.enum.SolidInvisible;
+    new_tile = this.game.tilesEnum.SolidInvisible;
   }
   var it = new Vec2d(0, 0);
   for (it.x = 0; it.x < this.size.x; it.x +=1) {
@@ -469,12 +470,11 @@ Gear.prototype.hit = function(who_done_it) {
 
   var is_char = false;
   if (this.game.control_lemming < this.game.lemmings.length) {
-    // TODO this === check might not work; might have to use IDs
     is_char = this.game.lemmings[this.game.control_lemming] === who_done_it;
   }
 
   this.game.hitButtonId(this.button_id);
-  this.sprite.setAnimationName('gear_bloody');
+  this.sprite.setAnimation(ani.gear_bloody);
   this.game.playSoundAt('spike_death', who_done_it.pos);
   this.game.spawnGoreExplosion(who_done_it.pos, who_done_it.vel, who_done_it.size);
 
@@ -570,8 +570,6 @@ function LevelPlayer(game, level_fd) {
   this.batch_level = new chem.Batch();
   this.batch_static = new chem.Batch();
 
-  // TODO loop the bg music
-
   this.loadConfig();
   this.level_fd = level_fd;
 }
@@ -620,16 +618,16 @@ LevelPlayer.prototype.loadImages = function() {
 
   this.img_hud = chem.resources.getImage('hud');
   this.img_gore = [
-    'gore1',
-    'gore2',
-    'gore3',
+    ani.gore1,
+    ani.gore2,
+    ani.gore3,
   ];
 
   var name;
   if (this.level.properties.bg_art) {
     name = this.level.properties.bg_art;
-    this.sprite_bg_left = new chem.Sprite(name, { batch: this.batch_bg2 });
-    this.sprite_bg_right = new chem.Sprite(name, { batch: this.batch_bg2});
+    this.sprite_bg_left = new chem.Sprite(ani[name], { batch: this.batch_bg2 });
+    this.sprite_bg_right = new chem.Sprite(ani[name], { batch: this.batch_bg2});
     this.sprite_bg_left.pos = new Vec2d(0, 0);
     this.sprite_bg_right.pos = new Vec2d(this.sprite_bg_left.size.x, 0);
   } else {
@@ -640,8 +638,8 @@ LevelPlayer.prototype.loadImages = function() {
 
   if (this.level.properties.fg_art) {
     name = this.level.properties.fg_art;
-    this.sprite_bg2_left = new chem.Sprite(name, {batch: this.batch_bg1});
-    this.sprite_bg2_right = new chem.Sprite(name, {batch: this.batch_bg1});
+    this.sprite_bg2_left = new chem.Sprite(ani[name], {batch: this.batch_bg1});
+    this.sprite_bg2_right = new chem.Sprite(ani[name], {batch: this.batch_bg1});
     this.sprite_bg2_left.pos = new Vec2d(0, 0);
     this.sprite_bg2_right.pos = new Vec2d(this.sprite_bg2_left.size.x, 0);
   } else {
@@ -675,9 +673,9 @@ LevelPlayer.prototype.getDesiredScroll = function(point) {
   var scroll = point.minus(this.game.engine.size.scaled(0.5))
   if (scroll.x < 0) scroll.x = 0;
   if (scroll.y < 0) scroll.y = 0;
-  var maxRight = this.level.width * this.level.tilewidth - this.game.engine.size.x;
+  var maxRight = this.level.width * this.level.tileWidth - this.game.engine.size.x;
   if (scroll.x > maxRight) scroll.x = maxRight;
-  var maxDown = this.level.height * this.level.tileheight - this.game.engine.size.y;
+  var maxDown = this.level.height * this.level.tileHeight - this.game.engine.size.y;
   if (scroll.y > maxDown) scroll.y = maxDown;
   return scroll;
 };
@@ -710,8 +708,10 @@ LevelPlayer.prototype.clear = function() {
 };
 
 LevelPlayer.prototype.start = function() {
-  this.load();
+  this.load(this.afterLoad.bind(this));
+};
 
+LevelPlayer.prototype.afterLoad = function() {
   this.game.engine.on('draw', this.on_draw.bind(this));
 
   this.scroll = this.getDesiredScroll(this.start_point);
@@ -731,7 +731,7 @@ LevelPlayer.prototype.start = function() {
   // resets variables based on level and begins the game
   // generate data for each lemming
   for (var i = 0; i < this.lemmings.length; i += 1) {
-    var sprite = new chem.Sprite('lem_crazy', {
+    var sprite = new chem.Sprite(ani.lem_crazy, {
       batch: this.batch_level,
       zOrder: this.group_char,
     })
@@ -763,7 +763,7 @@ LevelPlayer.prototype.start = function() {
 
   this.sfx.level_start.play();
 
-  this.sprite_hud = new chem.Sprite('hud', {
+  this.sprite_hud = new chem.Sprite(ani.hud, {
     batch: this.batch_static,
     pos: new Vec2d(0, 0),
   });
@@ -779,14 +779,14 @@ LevelPlayer.prototype.getGrabbedBy = function(monster, throw_vel) {
   // TODO: minus thing
   var negate = "";
   if (monster.direction < 0) negate = '-';
-  monster.sprite.setAnimationName(negate+"monster_throw");
+  monster.sprite.setAnimation(ani[negate+"monster_throw"]);
   monster.sprite.once('animationend', reset_animation);
 
   function reset_animation() {
-    monster.sprite.setAnimationName(negate+"monster_still");
+    monster.sprite.setAnimation(ani[negate+"monster_still"]);
     self.lemmings[self.control_lemming].frame.vel = monster.vel.plus(throw_vel);
     self.lemmings[self.control_lemming].frame.pos = new Vec2d(
-        monster.pos.x + (1+monster.direction)*self.level.tilewidth,
+        monster.pos.x + (1+monster.direction)*self.level.tileWidth,
         monster.pos.y);
     self.lemmings[self.control_lemming].sprite.visible = true;
     self.held_by = null;
@@ -818,7 +818,7 @@ LevelPlayer.prototype.detachHeadLemming = function() {
 
 LevelPlayer.prototype.handleExplosion = function(pos, vel, caused_by_self) {
   this.playSoundAt('blast', pos);
-  var sprite = new chem.Sprite('explosion', {
+  var sprite = new chem.Sprite(ani.explosion, {
     batch: this.batch_level,
     zOrder: this.group_fg,
   });
@@ -836,7 +836,7 @@ LevelPlayer.prototype.handleExplosion = function(pos, vel, caused_by_self) {
       if (pt.distance(block_pos) <= explosion_power) {
         // affect block
         var tile = this.getTile(pt);
-        if (tile.breakable) this.setTile(pt, this.tiles.enum.Air);
+        if (tile.breakable) this.setTile(pt, this.tilesEnum.Air);
       }
     }
   }
@@ -851,8 +851,7 @@ LevelPlayer.prototype.handleExplosion = function(pos, vel, caused_by_self) {
     if (obj.gone) return;
     var obj_center = obj.size.times(tile_size).scale(0.5).plus(obj.pos);
     var distance = obj_center.distance(pos);
-    // TODO tilewidth
-    if (distance < explosion_power * self.level.tilewidth) {
+    if (distance < explosion_power * self.level.tileWidth) {
       if (obj.explodable) {
         // kill monster
         obj.delete();
@@ -905,8 +904,7 @@ LevelPlayer.prototype.update = function(dt, dx) {
       self.bellyflop_queued = true;
     } else {
       char = self.lemmings[self.control_lemming];
-      // TODO: wtf is level.tilewidth
-      var pos_at_feet = new Vec2d(char.frame.pos.x + self.level.tilewidth / 2, char.frame.pos.y - 1);
+      var pos_at_feet = new Vec2d(char.frame.pos.x + self.level.tileWidth / 2, char.frame.pos.y - 1);
       var block_at_feet = pos_at_feet.divBy(tile_size).floor();
       var on_ground = self.getBlockIsSolid(block_at_feet);
 
@@ -955,7 +953,7 @@ LevelPlayer.prototype.update = function(dt, dx) {
       var size = new Vec2d(3, 1);
       var shift = 0;
       var obj_pos = new Vec2d(old_head_lemming.frame.pos.x, old_head_lemming.frame.pos.y);
-      sprite = new chem.Sprite(animationName, {
+      sprite = new chem.Sprite(ani[animationName], {
         batch: self.batch_level,
         zOrder: self.group_fg,
       });
@@ -963,7 +961,7 @@ LevelPlayer.prototype.update = function(dt, dx) {
           size, undefined, true, true, direction);
       // shift it left until not in wall
       while (inWall(self, obj, size)) {
-        obj.pos.x -= self.level.tilewidth;
+        obj.pos.x -= self.level.tileWidth;
       }
       self.physical_objects.push(obj);
       self.detachHeadLemming();
@@ -980,7 +978,7 @@ LevelPlayer.prototype.update = function(dt, dx) {
     }
     // add the missing frames
     var old_last_frame = self.lemmings[self.lemmings.length - 2].frame;
-    sprite = new chem.Sprite('lem_crazy', {
+    sprite = new chem.Sprite(ani.lem_crazy, {
       batch: self.batch_level,
       zOrder: self.group_char,
     });
@@ -1053,6 +1051,7 @@ LevelPlayer.prototype.update = function(dt, dx) {
 
   function prepareObjSprite(obj) {
     if (obj.gone) return;
+    // TODO animation_offset
     var offset = self.animation_offset[obj.sprite.animationName];
     if (offset == null) offset = new Vec2d(0, 0);
     obj.sprite.pos = obj.pos.plus(offset);
@@ -1118,8 +1117,8 @@ LevelPlayer.prototype.update = function(dt, dx) {
     for (var x = 0; x < obj.size.x; x += 1) {
       blocks_at_feet.push(new Vec2d(corner_foot_block.x+x, corner_foot_block.y));
     }
-    if (Math.floor(obj.pos.x / self.level.tilewidth) !==
-        Math.floor(Math.round(obj.pos.x / self.level.tilewidth)))
+    if (Math.floor(obj.pos.x / self.level.tileWidth) !==
+        Math.floor(Math.round(obj.pos.x / self.level.tileWidth)))
     {
       blocks_at_feet.push(new Vec2d(
           blocks_at_feet[blocks_at_feet.length - 1].x + 1,
@@ -1189,9 +1188,9 @@ LevelPlayer.prototype.update = function(dt, dx) {
     if (on_ground && obj.vel.lengthSqrd() === 0 && obj.is_belly_flop) {
       // replace tiles it took up with dead body
       var mid_block = obj.pos.divBy(tile_size).apply(Math.round).floor();
-      self.setTile(mid_block.offset(0, 0), self.tiles.enum.DeadBodyLeft);
-      self.setTile(mid_block.offset(1, 0), self.tiles.enum.DeadBodyMiddle);
-      self.setTile(mid_block.offset(2, 0), self.tiles.enum.DeadBodyRight);
+      self.setTile(mid_block.offset(0, 0), self.tilesEnum.DeadBodyLeft);
+      self.setTile(mid_block.offset(1, 0), self.tilesEnum.DeadBodyMiddle);
+      self.setTile(mid_block.offset(2, 0), self.tilesEnum.DeadBodyRight);
 
       obj.delete();
     }
@@ -1211,12 +1210,12 @@ function doItemPickups(self, obj, tiles_at_feet, char, corner_foot_block,
 
       // +1
       if (self.control_lemming - self.plus_ones_queued > 0) {
-        if (tile.id === self.tiles.enum.PlusOne) {
+        if (tile.id === self.tilesEnum.PlusOne) {
           self.plus_ones_queued += 1;
-          self.setTile(block, self.tiles.enum.Air);
+          self.setTile(block, self.tilesEnum.Air);
           var sfx_player = self.playSoundAt('coin_pickup', block.times(tile_size));
           sfx_player.playbackRate = 2 - (self.lemmings.length - self.control_lemming - 1) / self.lemmings.length;
-        } else if (tile.id === self.tiles.enum.PlusForever) {
+        } else if (tile.id === self.tilesEnum.PlusForever) {
           self.plus_ones_queued = self.control_lemming;
           self.playSoundAt('coin_pickup', block.times(tile_size));
         }
@@ -1230,7 +1229,7 @@ function doItemPickups(self, obj, tiles_at_feet, char, corner_foot_block,
           self.handleExplosion(block.times(tile_size), new Vec2d(0, 0));
           obj.delete();
         }
-        self.setTile(block, self.tiles.enum.Air);
+        self.setTile(block, self.tilesEnum.Air);
         self.playSoundAt('mine_beep', block.times(tile_size));
       }
 
@@ -1257,20 +1256,20 @@ function doItemPickups(self, obj, tiles_at_feet, char, corner_foot_block,
       obj.delete();
     }
     if (obj.is_belly_flop) {
-      self.setTile(corner_foot_block, self.tiles.enum.DeadBodyLeft);
-      self.setTile(corner_foot_block.offset(1, 0), self.tiles.enum.DeadBodyMiddle);
-      self.setTile(corner_foot_block.offset(2, 0), self.tiles.enum.DeadBodyRight);
+      self.setTile(corner_foot_block, self.tilesEnum.DeadBodyLeft);
+      self.setTile(corner_foot_block.offset(1, 0), self.tilesEnum.DeadBodyMiddle);
+      self.setTile(corner_foot_block.offset(2, 0), self.tilesEnum.DeadBodyRight);
     } else {
-      self.setTile(corner_foot_block, self.tiles.enum.DeadBodyMiddle);
+      self.setTile(corner_foot_block, self.tilesEnum.DeadBodyMiddle);
 
       if (blocks_at_feet.length > obj.size.x) {
-        self.setTile(corner_foot_block.offset(1, 0), self.tiles.enum.DeadBodyMiddle);
+        self.setTile(corner_foot_block.offset(1, 0), self.tilesEnum.DeadBodyMiddle);
       }
 
       // TODO minus thing
       var negate = "";
       if (obj.vel.x < 0) negate = '-';
-      var sprite = new chem.Sprite(negate+'lem_die', {
+      var sprite = new chem.Sprite(ani[negate+'lem_die'], {
         batch: self.batch_level,
         zOrder: self.group_fg,
       });
@@ -1307,8 +1306,8 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
     // switch sprite to running left
     if (on_ground) {
       // TODO minus thing
-      if (obj.sprite.animationName !== '-lem_run') {
-        obj.sprite.setAnimationName('-lem_run');
+      if (obj.sprite.animation !== ani['-lem_run']) {
+        obj.sprite.setAnimation(ani['-lem_run']);
         // TODO new_image thing
         obj.frame.new_image = obj.sprite.image;
 
@@ -1324,8 +1323,8 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
 
     // switch sprite to running right
     if (on_ground) {
-      if (obj.sprite.animationName !== 'lem_run') {
-        obj.sprite.setAnimationName('lem_run');
+      if (obj.sprite.animation !== ani.lem_run) {
+        obj.sprite.setAnimation(ani.lem_run);
         // TODO new_image thing
         obj.frame.new_image = obj.sprite.image;
 
@@ -1334,8 +1333,8 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
     }
   } else if (on_ground) {
     // switch sprite to still
-    if (obj.sprite.animationName !== 'lem_crazy') {
-      obj.sprite.setAnimationName('lem_crazy');
+    if (obj.sprite.animation !== ani.lem_crazy) {
+      obj.sprite.setAnimation(ani.lem_crazy);
       debugger; // TODO new_image wtf? sprite.image wtf?
       obj.frame.new_image = obj.sprite.image;
 
@@ -1350,7 +1349,7 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
     new_pos_grid = new_pos.divBy(tile_size).floor();
 
     if (! self.getTile(new_pos_grid, 1).ladder) {
-      obj.pos.y = new_pos_grid.y * self.level.tileheight;
+      obj.pos.y = new_pos_grid.y * self.level.tileHeight;
       obj.on_ladder = false;
     } else {
       obj.on_ladder = true;
@@ -1359,8 +1358,8 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
       obj.pos.y += ladder_velocity * dt;
 
       // switch sprite to ladder
-      if (obj.sprite.animationName !== 'lem_climb') {
-        obj.sprite.setAnimationName('lem_climb');
+      if (obj.sprite.animation !== ani.lem_climb) {
+        obj.sprite.setAnimation(ani.lem_climb);
         // TODO new_image wtf
         obj.frame.new_image = obj.sprite.image;
 
@@ -1374,7 +1373,7 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
     if (self.getBlockIsSolid(new_pos_grid) &&
         !self.getTile(new_pos_grid, 1).ladder)
     {
-      obj.pos.y = (new_pos_grid.y + 1) * self.level.tileheight;
+      obj.pos.y = (new_pos_grid.y + 1) * self.level.tileHeight;
       obj.on_ladder = false;
     } else {
       obj.on_ladder = true;
@@ -1382,8 +1381,8 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
       obj.pos.y -= ladder_velocity * dt;
 
       // switch sprite to ladder
-      if (obj.sprite.animationName !== 'lem_climb') {
-        obj.sprite.setAnimationName('lem_climb');
+      if (obj.sprite.animation !== ani.lem_climb) {
+        obj.sprite.setAnimation(ani.lem_climb);
         // TODO new_image wtf
         obj.frame.new_image = obj.sprite.image;
 
@@ -1402,8 +1401,8 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
       // TODO minus thing
       animation_name = '-' + animation_name;
     }
-    if (obj.sprite.animationName !== animation_name) {
-      obj.sprite.setAnimationName(animation_name);
+    if (obj.sprite.animation !== ani[animation_name]) {
+      obj.sprite.setAnimation(ani[animation_name]);
       // TODO new_image wtf?
       obj.frame.new_image = obj.sprite.image;
 
@@ -1415,8 +1414,8 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
   }
   if (obj.on_ladder && (! move_up && !move_down)) {
     // switch sprite to ladder, still
-    if (obj.sprite.animationName !== 'lem_climb_still') {
-      obj.sprite.setAnimationName('lem_climb_still');
+    if (obj.sprite.animation !== ani.lem_climb_still) {
+      obj.sprite.setAnimation(ani.lem_climb_still);
       // TODO new_image wtf?
       obj.frame.new_image = obj.sprite.image;
 
@@ -1449,7 +1448,7 @@ function resolve_x(self, obj, new_pos, vel, obj_size) {
       new_body_block = new Vec2d(new_feet_block.x, new_feet_block.y + y);
       block_solid = self.getBlockIsSolid(new_body_block);
       if (block_solid) {
-        new_pos.x = (new_feet_block.x+1)*self.level.tilewidth;
+        new_pos.x = (new_feet_block.x+1)*self.level.tileWidth;
         vel.x = 0;
         return true;
       }
@@ -1460,7 +1459,7 @@ function resolve_x(self, obj, new_pos, vel, obj_size) {
       new_body_block = new Vec2d(new_feet_block.x+obj_size.x, new_feet_block.y + y);
       block_solid = self.getBlockIsSolid(new_body_block);
       if (block_solid) {
-        new_pos.x = new_feet_block.x * self.level.tilewidth;
+        new_pos.x = new_feet_block.x * self.level.tileWidth;
         vel.x = 0;
         return true;
       }
@@ -1477,9 +1476,9 @@ function resolve_y(self, obj, new_pos, vel, obj_size) {
 
   // ramps
   if (tile_there.ramp === -1) {
-    new_pos.y = new_feet_block.y * self.level.tileheight + self.level.tileheight;
+    new_pos.y = new_feet_block.y * self.level.tileHeight + self.level.tileHeight;
   } else if (self.getTile(new Vec2d(new_feet_block.x+1, new_feet_block.y)).ramp === 1) {
-    new_pos.y = new_feet_block.y * self.level.tileheight + self.level.tileheight;
+    new_pos.y = new_feet_block.y * self.level.tileHeight + self.level.tileHeight;
   }
 
   var x;
@@ -1489,7 +1488,7 @@ function resolve_y(self, obj, new_pos, vel, obj_size) {
       var new_head_block = new Vec2d(new_feet_block.x + x, new_feet_block.y + obj_size.y);
       var block_solid = self.getBlockIsSolid(new_head_block);
       if (block_solid) {
-        new_pos.y = new_feet_block.y * self.level.tileheight;
+        new_pos.y = new_feet_block.y * self.level.tileHeight;
         vel.y = 0;
         return true;
       }
@@ -1500,8 +1499,8 @@ function resolve_y(self, obj, new_pos, vel, obj_size) {
     for (x = 0; x < obj.size.x; x += 1) {
       new_blocks_at_feet.push(new Vec2d(new_feet_block.x+x, new_feet_block.y));
     }
-    if (Math.floor(new_pos.x / self.level.tilewidth) !==
-        Math.floor(Math.round(new_pos.x / self.level.tilewidth)))
+    if (Math.floor(new_pos.x / self.level.tileWidth) !==
+        Math.floor(Math.round(new_pos.x / self.level.tileWidth)))
     {
       new_blocks_at_feet.push(new Vec2d(
             new_blocks_at_feet[new_blocks_at_feet.length-1].x+1,
@@ -1514,7 +1513,7 @@ function resolve_y(self, obj, new_pos, vel, obj_size) {
       return isSolid;
     });
     if (anyAreSolid) {
-      new_pos.y = (new_feet_block.y+1)*self.level.tileheight;
+      new_pos.y = (new_feet_block.y+1)*self.level.tileHeight;
       vel.y = 0;
       return true;
     }
@@ -1566,13 +1565,8 @@ LevelPlayer.prototype.blockAt = function(abs_pt) {
 };
 
 LevelPlayer.prototype.getTile = function(block_pos, layer_index) {
-  var tile = null;
-  try {
-    debugger; // make sure that crazy lookup will work
-    tile = this.tiles.info[this.level.layers[layer_index].content2D[block_pos.x][block_pos.y]];
-  } catch (err) {}
-  if (tile) return tile;
-  return this.tiles.info[this.tiles.enum.Air];
+  debugger; // make sure that crazy lookup will work
+  return this.level.layers[layer_index].tileAt(block_pos.x, block_pos.y);
 };
 
 LevelPlayer.prototype.getBlockIsSolid = function(block_pos) {
@@ -1587,12 +1581,14 @@ LevelPlayer.prototype.getBlockIsSolid = function(block_pos) {
   return false;
 };
 
-LevelPlayer.prototype.setTile = function(block_pos, tile_id) {
-  this.level.layers[0].content2D[block_pos.x][block_pos.y] = tile_id;
+// TODO: do we need to delete the old sprite?
+LevelPlayer.prototype.setTile = function(block_pos, tile) {
+  debugger; // make sure this method does the right thing
+  this.level.layers[0].setTileAt(block_pos.x, block_pos.y, tile);
   var new_sprite = null;
-  if (tile_id !== 0) {
-    new_sprite = new chem.Sprite(this.level.indexed_tiles[tile_id][2], {
-      pos: new Vec2d(this.level.tilewidth * block_pos.x, this.level.tileheight * block_pos.y),
+  if (tile != null) {
+    new_sprite = new chem.Sprite(this.tileAnims[tile.id], {
+      pos: new Vec2d(this.level.tileWidth * block_pos.x, this.level.tileHeight * block_pos.y),
       batch: this.batch_level,
       zOrder: this.layer_group[0],
     });
@@ -1616,91 +1612,104 @@ LevelPlayer.prototype.hitButtonId = function(button_id) {
   });
 };
 
-LevelPlayer.prototype.load = function() {
+LevelPlayer.prototype.load = function(cb) {
   var self = this;
 
-  // TODO implement tmx and make sure the interface works everywhere
-  self.level = tmx.parse(self.level_fd);
-  tile_size = new Vec2d(self.level.tilewidth, self.level.tileheight);
+  tmx.parseFile(self.level_fd, function(err, map) {
+    if (err) throw err;
+    self.level = map;
 
-  self.loadImages();
-  self.loadSoundEffects();
+    tile_size = new Vec2d(self.level.tileWidth, self.level.tileHeight);
 
-  self.tiles = new TileSet(self.level.tile_sets[0]);
+    self.loadImages();
+    self.loadSoundEffects();
 
-  // load tiles into sprites
-  self.next_group_num = 0;
-  self.group_bg2 = self.getNextGroupNum();
-  self.group_bg1 = self.getNextGroupNum();
+    var tiles = self.level.tileSets[0].tiles;
+    self.tilesEnum = {Air: null};
+    tiles.forEach(function(tile) {
+      if (tile.properties.name) self.tilesEnum[tile.properties.name] = tile;
+    });
+    self.tileAnims = tiles.map(function(tile) {
+      return chem.Animation.fromImage(tile.image);
+    });
 
-  self.sprites = []; // [layer][x][y]
-  for (var i = 0; i < self.level.layers.length; i += 1) {
-    var layer = self.level.layers[i];
-    self.sprites.push([]);
-    for (var x = 0; x < layer.width; x += 1) {
-      self.sprites[i].push([]);
-      for (var y = 0; y < layer.height; y += 1) {
-        self.sprites[i][x].push(null);
+    // load tiles into sprites
+    self.next_group_num = 0;
+    self.group_bg2 = self.getNextGroupNum();
+    self.group_bg1 = self.getNextGroupNum();
+
+    self.sprites = []; // [layer][x][y]
+    for (var i = 0; i < self.level.layers.length; i += 1) {
+      var layer = self.level.layers[i];
+      self.sprites.push([]);
+      for (var x = 0; x < layer.width; x += 1) {
+        self.sprites[i].push([]);
+        for (var y = 0; y < layer.height; y += 1) {
+          self.sprites[i][x].push(null);
+        }
       }
     }
-  }
 
-  self.layer_group = [];
+    self.layer_group = [];
 
-  for (var layer_index = 0; layer_index < self.level.layers.length; layer_index += 1)
-  {
-    var group = self.getNextGroupNum();
-    self.layer_group.push(group);
-    for (var xtile = 0; xtile < layer.width; xtile += 1) {
-      layer.content2D[xtile].reverse();
-    }
-    for (var ytile = 0; ytile < layer.height; ytile += 1) {
-      // To compensate for pyglet's upside-down y-axis, the Sprites are
-      // placed in rows that are backwards compared to what was loaded
-      // into the map. The next operation puts all rows upside-down.
+    for (var layer_index = 0; layer_index < self.level.layers.length; layer_index += 1)
+    {
+      var group = self.getNextGroupNum();
+      self.layer_group.push(group);
+      for (var xtile = 0; xtile < layer.width; xtile += 1) {
+        layer.content2D[xtile].reverse();
+      }
+      for (var ytile = 0; ytile < layer.height; ytile += 1) {
+        // To compensate for pyglet's upside-down y-axis, the Sprites are
+        // placed in rows that are backwards compared to what was loaded
+        // into the map. The next operation puts all rows upside-down.
 
-      // now that we are using chem, the Y-axis is no longer fucked.
-      // but it's probably harder to refactor all the physics and
-      // calculations than it is to mess with the sprites right before display.
-      // So I'm going to leave this shit in here for now.
+        // now that we are using chem, the Y-axis is no longer fucked.
+        // but it's probably harder to refactor all the physics and
+        // calculations than it is to mess with the sprites right before display.
+        // So I'm going to leave this shit in here for now.
 
+        // TODO: port the rest
+      }
       // TODO: port the rest
     }
-    // TODO: port the rest
-  }
 
-  var had_player_layer = false;
-  var had_start_point = false;
+    var had_player_layer = false;
+    var had_start_point = false;
 
-  function translate_y(y, obj_height) {
-    obj_height = obj_height == null ? 0 : obj_height;
-    return self.level.height * self.level.tileheight - y - obj_height;
-  }
+    function translate_y(y, obj_height) {
+      obj_height = obj_height == null ? 0 : obj_height;
+      return self.level.height * self.level.tileHeight - y - obj_height;
+    }
 
-  self.labels = [];
-  self.obj_sprites = {};
+    self.labels = [];
+    self.obj_sprites = {};
 
-  self.level.object_groups.forEach(function(obj_group) {
-    // TODO: port the rest
+    // TODO: replace object_groups
+    self.level.object_groups.forEach(function(obj_group) {
+      // TODO: port the rest
+    });
+
+    if (! had_start_point) {
+      throw new Error("Level missing start point");
+    }
+
+    if (! had_player_layer) {
+      console.log("Level was missing PlayerLayer");
+      self.group_char = self.getNextGroupNum();
+    }
+    self.group_fg = self.getNextGroupNum();
+
+    // load bg music
+    var bg_music_src = self.level.properties.bg_music;
+    if (bg_music_src) {
+      self.bg_music = new Audio(bg_music_src);
+      self.bg_music.loop = true;
+      self.bg_music.play();
+    }
+
+    cb();
   });
-
-  if (! had_start_point) {
-    throw new Error("Level missing start point");
-  }
-
-  if (! had_player_layer) {
-    console.log("Level was missing PlayerLayer");
-    self.group_char = self.getNextGroupNum();
-  }
-  self.group_fg = self.getNextGroupNum();
-
-  // load bg music
-  var bg_music_src = self.level.properties.bg_music;
-  if (bg_music_src) {
-    self.bg_music = new Audio(bg_music_src);
-    self.bg_music.loop = true;
-    self.bg_music.play();
-  }
 };
 
 LevelPlayer.prototype.isVictory = function(block) {
@@ -1708,7 +1717,7 @@ LevelPlayer.prototype.isVictory = function(block) {
 };
 
 LevelPlayer.prototype.spawnBullet = function(pos, vel) {
-  var sprite = new chem.Sprite('bullet', {
+  var sprite = new chem.Sprite(ani.bullet, {
     pos: pos.clone(),
     batch: this.batch_level,
     zOrder: this.group_fg,
@@ -1728,7 +1737,7 @@ LevelPlayer.prototype.hitByBullet = function() {
 };
 
 LevelPlayer.prototype.spawnBomb = function(pos, vel, fuse) {
-  var sprite = new chem.Sprite('bomb', {
+  var sprite = new chem.Sprite(ani.bomb, {
     pos: pos.clone(),
     batch: this.batch_level,
     zOrder: this.group_fg,
@@ -1754,8 +1763,8 @@ LevelPlayer.prototype.spawnGoreExplosion = function(pos, vel, size) {
   for (var i = 0; i < amt; i += 1) {
     // pick a random position
     var this_pos = pos.offset(
-        Math.random() * size.x * this.level.tilewidth,
-        Math.random() * size.y * this.level.tileheight);
+        Math.random() * size.x * this.level.tileWidth,
+        Math.random() * size.y * this.level.tileHeight);
     // pick velocity
     var this_vel = center_vel.offset(
         Math.random() * vel_variability.x - vel_variability.x / 2,

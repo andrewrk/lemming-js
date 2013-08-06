@@ -1,5 +1,6 @@
 var chem = require('chem');
 var Vec2d = chem.vec2d.Vec2d;
+var ani = chem.resources.animations;
 var euclideanMod = require('./euclidean_mod');
 
 exports.MainMenu = MainMenu;
@@ -23,32 +24,32 @@ MainMenu.prototype.start = function() {
   var group_fg = 1;
 
   // position sprites
-  var sprite_bg = new chem.Sprite('title/bg', {
+  var sprite_bg = new chem.Sprite(ani['title/bg'], {
     batch: this.batch,
     pos: new Vec2d(0, 0),
     zOrder: group_bg,
   });
-  var sprite_title = new chem.Sprite('title/title', {
+  var sprite_title = new chem.Sprite(ani['title/title'], {
     batch: this.batch,
     pos: this.title_pos,
     zOrder: group_fg,
   });
-  var sprite_new_game = new chem.Sprite('title/new_game', {
+  var sprite_new_game = new chem.Sprite(ani['title/new_game'], {
     batch: this.batch,
     pos: this.arrow_positions[0][0],
     zOrder: group_fg,
   });
-  var sprite_continue = new chem.Sprite('title/continue', {
+  var sprite_continue = new chem.Sprite(ani['title/continue'], {
     batch: this.batch,
     pos: this.arrow_positions[1][0],
     zOrder: group_fg,
   });
-  this.sprite_arrow = new chem.Sprite('title/arrow', {
+  this.sprite_arrow = new chem.Sprite(ani['title/arrow'], {
     batch: this.batch,
     pos: new Vec2d(0, 0),
     zOrder: group_fg,
   });
-  var sprite_lem = new chem.Sprite('title/lem', {
+  var sprite_lem = new chem.Sprite(ani['title/lem'], {
     batch: this.batch,
     pos: this.lem_pos,
     zOrder: group_fg,
