@@ -5,6 +5,8 @@ var util = require('util');
 var modulus = require('./euclidean_mod');
 var tmx = require('chem-tmx');
 
+exports.LevelPlayer = LevelPlayer;
+
 function sign(n) {
   if (n > 0) {
     return 1;
@@ -616,7 +618,7 @@ LevelPlayer.prototype.setRunningSound = function(source) {
 LevelPlayer.prototype.loadImages = function() {
   // TODO: generate the minus animations?
 
-  this.img_hud = chem.resources.images('hud.png');
+  this.img_hud = chem.resources.images['hud.png'];
   this.img_gore = [
     ani.gore1,
     ani.gore2,
@@ -1615,7 +1617,7 @@ LevelPlayer.prototype.hitButtonId = function(button_id) {
 LevelPlayer.prototype.load = function(cb) {
   var self = this;
 
-  tmx.parseFile(self.level_fd, function(err, map) {
+  tmx.load(chem, self.level_fd, function(err, map) {
     if (err) throw err;
     self.level = map;
 

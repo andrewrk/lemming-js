@@ -158,9 +158,6 @@ exports.spritesheet = {
       anchor: 'bottomleft',
       frames: ['gear/05.png'],
     },
-    'credits/bg': {
-      anchor: 'topleft',
-    },
     'title/bg': {
       anchor: 'topleft',
     },
@@ -178,9 +175,6 @@ exports.spritesheet = {
     },
     'title/lem': {
       anchor: 'bottomleft',
-    },
-    'hud': {
-      anchor: 'topleft',
     },
     'bullet': {},
     'bomb': {},

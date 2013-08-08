@@ -81,7 +81,6 @@ Game.prototype.start = function(level_filename) {
     self.current_screen = new levelplayer.LevelPlayer(this, level_filename);
   }
   self.current_screen.start();
-  self.engine.start();
 };
 
 Game.prototype.clearCurrentScreen = function() {
