@@ -616,8 +616,7 @@ LevelPlayer.prototype.setRunningSound = function(source) {
 LevelPlayer.prototype.loadImages = function() {
   // TODO: generate the minus animations?
 
-  // TODO: replace getImage with chem.resources.images
-  this.img_hud = chem.resources.getImage('hud');
+  this.img_hud = chem.resources.images('hud.png');
   this.img_gore = [
     ani.gore1,
     ani.gore2,
