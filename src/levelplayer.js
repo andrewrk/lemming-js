@@ -616,6 +616,7 @@ LevelPlayer.prototype.setRunningSound = function(source) {
 LevelPlayer.prototype.loadImages = function() {
   // TODO: generate the minus animations?
 
+  // TODO: replace getImage with chem.resources.images
   this.img_hud = chem.resources.getImage('hud');
   this.img_gore = [
     ani.gore1,
@@ -1639,12 +1640,14 @@ LevelPlayer.prototype.load = function(cb) {
     self.group_bg1 = self.getNextGroupNum();
 
     self.sprites = []; // [layer][x][y]
+    var layer;
     for (var i = 0; i < self.level.layers.length; i += 1) {
-      var layer = self.level.layers[i];
+      layer = self.level.layers[i];
+      if (layer.type !== 'tile') continue;
       self.sprites.push([]);
-      for (var x = 0; x < layer.width; x += 1) {
+      for (var x = 0; x < self.level.width; x += 1) {
         self.sprites[i].push([]);
-        for (var y = 0; y < layer.height; y += 1) {
+        for (var y = 0; y < self.level.height; y += 1) {
           self.sprites[i][x].push(null);
         }
       }
@@ -1652,14 +1655,15 @@ LevelPlayer.prototype.load = function(cb) {
 
     self.layer_group = [];
 
+    var tileLayerIndex = -1;
     for (var layer_index = 0; layer_index < self.level.layers.length; layer_index += 1)
     {
+      layer = self.level.layers[layer_index];
+      if (layer.type !== 'tile') continue;
+      tileLayerIndex += 1;
       var group = self.getNextGroupNum();
       self.layer_group.push(group);
-      for (var xtile = 0; xtile < layer.width; xtile += 1) {
-        layer.content2D[xtile].reverse();
-      }
-      for (var ytile = 0; ytile < layer.height; ytile += 1) {
+      for (var ytile = 0; ytile < self.level.height; ytile += 1) {
         // To compensate for pyglet's upside-down y-axis, the Sprites are
         // placed in rows that are backwards compared to what was loaded
         // into the map. The next operation puts all rows upside-down.
@@ -1668,10 +1672,19 @@ LevelPlayer.prototype.load = function(cb) {
         // but it's probably harder to refactor all the physics and
         // calculations than it is to mess with the sprites right before display.
         // So I'm going to leave this shit in here for now.
+        var flippedY = self.level.height - ytile - 1;
 
-        // TODO: port the rest
+        for (var xtile = 0; xtile < self.level.width; xtile += 1) {
+          var tile = layer.tileAt(xtile, ytile);
+          if (tile) {
+            self.sprites[tileLayerIndex][xtile][flippedY] = new chem.Sprite(tile.animation, {
+              pos: new Vec2d(self.level.tileWidth * xtile, self.level.tileHeight * ytile),
+              batch: self.batch_level,
+              zOrder: group,
+            });
+          }
+        }
       }
-      // TODO: port the rest
     }
 
     var had_player_layer = false;
@@ -1685,9 +1698,201 @@ LevelPlayer.prototype.load = function(cb) {
     self.labels = [];
     self.obj_sprites = {};
 
-    // TODO: replace object_groups
-    self.level.object_groups.forEach(function(obj_group) {
-      // TODO: port the rest
+    self.level.layers.forEach(function(layer) {
+      if (layer.type !== 'object') return;
+      var group = self.getNextGroupNum();
+      if (layer.name === 'PlayerLayer') {
+        self.group_char = group;
+        had_player_layer = true;
+      }
+      layer.objects.forEach(function(obj) {
+        var anim, pos, size, sprite;
+        var up_img, down_img, up_anim, down_anim;
+        var up_sprite, down_sprite, button_id;
+        var it, state, direction, delay;
+        switch (obj.type) {
+          case 'StartPoint':
+            self.start_point = new Vec2d(obj.x, translate_y(obj.y, obj.height));
+            had_start_point = true;
+            break;
+          case 'Text':
+            var font_size = parseInt(obj.properties.font_size || 20, 10);
+            self.labels.push(new chem.Label(obj.properties.text, {
+              font: font_size + "px Arial",
+              pos: new Vec2d(obj.x, obj.y),
+              batch: self.batch_level,
+              zOrder: group,
+              fillStyle: "#000000",
+              size: new Vec2d(obj.width, obj.height),
+              textAlign: 'left',
+              textBaseline: 'top',
+            }));
+            break;
+          case 'Decoration':
+            if (obj.properties.img) {
+              anim = chem.Animation.fromImage(chem.resources.images[obj.properties.img]);
+            } else {
+              anim = ani[obj.properties.animation];
+            }
+            self.obj_sprites.push(new chem.Sprite(anim, {
+              pos: new Vec2d(obj.x, obj.y),
+              batch: self.batch_level,
+              zOrder: group,
+            }));
+            break;
+          case 'Agent':
+            direction = obj.properties.direction == null ? 1 :
+              parseInt(obj.properties.direction, 10);
+            pos = new Vec2d(obj.x, translate_y(obj.y, obj.height));
+            size = (new Vec2d(obj.width, obj.height)).div(tile_size).floor();
+            if (obj.properties.type === 'monster') {
+              var throw_vel = null;
+              if (obj.properties.throw_vel_x != null &&
+                  obj.properties.throw_vel_y != null)
+              {
+                throw_vel = new Vec2d(
+                    parseFloat(obj.properties.throw_vel_x, 10),
+                    parseFloat(obj.properties.throw_vel_y, 10));
+              }
+              self.physical_objects.push(new Monster(pos, size, group, self.batch_level,
+                    self, direction, throw_vel));
+            } else if (obj.properties.type === 'gunner') {
+              self.physical_objects.push(new Gunner(pos, size, group, self.batch_level, self));
+            } else if (obj.properties.type === 'tank') {
+              var dir_lock = obj.properties.direction_lock == null ? null :
+                parseInt(obj.properties.direction_lock, 10);
+              sprite = new chem.Sprite(ani.tank_point, {
+                pos: new Vec2d(obj.x, obj.y),
+                zOrder: group,
+                batch: self.batch_level,
+              });
+              self.physical_objects.push(new Tank(pos, size, sprite, self, dir_lock));
+            }
+            break;
+          case 'Bridge':
+            up_img = chem.resources.images['bridge_up.png'];
+            down_img = chem.resources.images['bridge_down.png'];
+            if (obj.properties.up_img && obj.properties.down_img) {
+              up_img = chem.resources.images[obj.properties.up_img];
+              down_img = chem.resources.images[obj.properties.down_img];
+            }
+            up_anim = chem.Animation.fromImage(up_img);
+            down_anim = chem.Animation.fromImage(down_img);
+            state = obj.properties.state || 'up';
+            button_id = obj.properties.button_id || '0';
+            var bridge_pos = new Vec2d(obj.x, translate_y(obj.y, obj.height));
+            var bridge_pos_grid = bridge_pos.divBy(tile_size).floor();
+            var bridge_size = (new Vec2d(obj.width, obj.height)).div(tile_size).floor();
+            up_sprite = new chem.Sprite(up_anim, {
+              pos: bridge_pos.clone(),
+              batch: self.batch_level,
+              zOrder: group,
+            });
+            down_sprite = new chem.Sprite(down_anim, {
+              pos: bridge_pos.clone(),
+              batch: self.batch_level,
+              zOrder: group,
+            });
+            var bridge = new Bridge(bridge_pos_grid, bridge_size, state, up_sprite, down_sprite);
+            self.button_responders[button_id] = bridge;
+            self.platform_objects.push(bridge);
+            break;
+          case 'TrapDoor':
+            anim = chem.Animation.fromImage(chem.resources.images[obj.properties.img]);
+            pos = new Vec2d(obj.x, translate_y(obj.y, obj.height));
+            var pos_grid = pos.divBy(tile_size).floor();
+            size = (new Vec2d(obj.width, obj.height)).div(tile_size).floor();
+            sprite = new chem.Sprite(anim, {
+              pos: pos.clone(),
+              batch: self.batch_level,
+              zOrder: group,
+            });
+            self.button_responders[obj.properties.button_id] = new TrapDoor(pos_grid, size,
+                obj.properties.state, sprite, self);
+            break;
+          case 'Button':
+            up_img = chem.resources.images['button_up.png'];
+            down_img = chem.resources.images['button_down.png'];
+            if (obj.properties.up_img && obj.properties.down_img) {
+              up_img = chem.resources.images[obj.properties.up_img];
+              down_img = chem.resources.images[obj.properties.down_img];
+            }
+            up_anim = chem.Animation.fromImage(up_img);
+            down_anim = chem.Animation.fromImage(down_img);
+            button_id = obj.properties.button_id || '0';
+            delay = obj.properties.delay == null ? 2 :
+              parseFloat(obj.properties.delay, 10);
+            var button_pos = new Vec2d(obj.x, translate_y(obj.y, obj.height));
+            var button_pos_grid = button_pos.divBy(tile_size).floor();
+            up_sprite = new chem.Sprite(up_anim, {
+              pos: button_pos.clone(),
+              batch: self.batch_level,
+              zOrder: group,
+            });
+            down_sprite = new chem.Sprite(down_anim, {
+              pos: button_pos.clone(),
+              batch: self.batch_level,
+              zOrder: group,
+            });
+            self.buttons[button_pos_grid.toString()] = new Button(button_pos_grid, button_id,
+                up_sprite, down_sprite, delay, self);
+            break;
+          case 'GearButton':
+            pos = new Vec2d(obj.x, translate_y(obj.y, obj.height));
+            size = (new Vec2d(obj.width, obj.height)).div(tile_size).floor();
+            pos_grid = pos.divBy(tile_size).floor();
+            sprite = new chem.Sprite(ani.gear_turning, {
+              pos: pos.clone(),
+              batch: self.batch_level,
+              zOrder: group,
+            });
+            var gear = new Gear(pos, size, obj.properties.button_id, sprite, self);
+            it = new Vec2d(0, 0);
+            for (it.y = pos.y; it.y < pos.y + size.y; it.y += 1) {
+              for (it.x = pos.x; it.x < pos.x + size.x; it.x += 1) {
+                self.buttons[it.toString()] = gear;
+              }
+            }
+            break;
+          case 'Victory':
+            pos = (new Vec2d(obj.x, translate_y(obj.y, obj.height))).div(tile_size).floor();
+            size = (new Vec2d(obj.width, obj.height)).div(tile_size).floor();
+            it = new Vec2d(0, 0);
+            for (it.y = pos.y; it.y < pos.y + size.y; it.y += 1) {
+              for (it.x = pos.x; it.x < pos.x + size.x; it.x += 1) {
+                self.victory[it.toString()] = true;
+              }
+            }
+            break;
+          case 'ConveyorBelt':
+            pos = new Vec2d(obj.x, translate_y(obj.y, obj.height));
+            pos_grid = pos.divBy(tile_size).floor();
+            size = (new Vec2d(obj.width, obj.height)).div(tile_size).floor();
+            state = obj.properties.state || 'on';
+            direction = obj.properties.direction == null ? 1 :
+              parseInt(obj.properties.direction, 10);
+            sprite = new chem.Sprite(ani.belt_on, {
+              pos: pos.clone(),
+              zOrder: group,
+              batch: self.batch_level,
+            });
+            self.button_responders[obj.properties.button_id] = new ConveyorBelt(pos_grid,
+                size, sprite, self, state, direction);
+            break;
+          case 'BombSpawner':
+            pos = new Vec2d(obj.x, translate_y(obj.y, obj.height));
+            size = new Vec2d(obj.width, obj.height);
+            state = obj.properties.state || 'on';
+            delay = obj.properties.delay == null ? 1 : parseFloat(obj.properties.delay, 10);
+            var fuse_min = obj.properties.fuse_min == null ? 1 :
+              parseFloat(obj.properties.fuse_min, 10);
+            var fuse_max = obj.properties.fuse_max == null ? 3 :
+              parseFloat(obj.properties.fuse_max, 10);
+            var spawner = new BombSpawner(pos, size, self, delay, state, fuse_min, fuse_max);
+            self.button_responders[obj.properties.button_id] = spawner;
+            break;
+        }
+      });
     });
 
     if (! had_start_point) {
