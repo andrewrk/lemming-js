@@ -619,6 +619,10 @@ LevelPlayer.prototype.setRunningSound = function(source) {
 
 LevelPlayer.prototype.loadImages = function() {
   // TODO: generate the minus animations?
+  var name;
+  for (name in animation_offsets) {
+    ani[name].offset = animation_offsets[name];
+  }
 
   this.img_hud = chem.Animation.fromImage(chem.resources.images['hud.png']);
   this.img_gore = [
@@ -627,15 +631,14 @@ LevelPlayer.prototype.loadImages = function() {
     ani.gore3,
   ];
 
-  var name;
   if (this.level.properties.bg_art) {
     name = this.level.properties.bg_art;
-    this.sprite_bg_left = new chem.Sprite(
-        chem.Animation.fromImage(chem.resources.images[name]), { batch: this.batch_bg2 });
-    this.sprite_bg_right = new chem.Sprite(
-        chem.Animation.fromImage(chem.resources.images[name]), { batch: this.batch_bg2});
-    this.sprite_bg_left.pos = new Vec2d(0, 0);
-    this.sprite_bg_right.pos = new Vec2d(this.sprite_bg_left.size.x, 0);
+    var bgImg = chem.resources.images[name];
+    var bgAnim = chem.Animation.fromImage(bgImg, {anchor: new Vec2d(0, bgImg.height)});
+    this.sprite_bg_left = new chem.Sprite(bgAnim, { batch: this.batch_bg2 });
+    this.sprite_bg_right = new chem.Sprite(bgAnim, { batch: this.batch_bg2});
+    this.sprite_bg_left.pos = new Vec2d(0, this.game.engine.size.y);
+    this.sprite_bg_right.pos = new Vec2d(this.sprite_bg_left.size.x, this.game.engine.size.y);
   } else {
     console.log("map is missing 'bg_art' property");
     this.sprite_bg_left = null;
@@ -644,12 +647,12 @@ LevelPlayer.prototype.loadImages = function() {
 
   if (this.level.properties.fg_art) {
     name = this.level.properties.fg_art;
-    this.sprite_bg2_left = new chem.Sprite(
-        chem.Animation.fromImage(chem.resources.images[name], {batch: this.batch_bg1}));
-    this.sprite_bg2_right = new chem.Sprite(
-        chem.Animation.fromImage(chem.resources.images[name], {batch: this.batch_bg1}));
-    this.sprite_bg2_left.pos = new Vec2d(0, 0);
-    this.sprite_bg2_right.pos = new Vec2d(this.sprite_bg2_left.size.x, 0);
+    var fgImg = chem.resources.images[name];
+    var fgAnim = chem.Animation.fromImage(fgImg, {anchor: new Vec2d(0, fgImg.height)});
+    this.sprite_bg2_left = new chem.Sprite(fgAnim, {batch: this.batch_bg1});
+    this.sprite_bg2_right = new chem.Sprite(fgAnim, {batch: this.batch_bg1});
+    this.sprite_bg2_left.pos = new Vec2d(0, this.game.engine.size.y);
+    this.sprite_bg2_right.pos = new Vec2d(this.sprite_bg2_left.size.x, this.game.engine.size.y);
   } else {
     console.log("map is missing 'fg_art' property");
     this.sprite_bg2_left = null;
@@ -1316,7 +1319,7 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
       if (obj.sprite.animation !== ani['-lem_run']) {
         obj.sprite.setAnimation(ani['-lem_run']);
         // TODO new_image thing
-        obj.frame.new_image = obj.sprite.image;
+        obj.frame.new_image = obj.sprite.animation;
 
         self.setRunningSound(self.running_audio);
       }
@@ -1333,7 +1336,7 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
       if (obj.sprite.animation !== ani.lem_run) {
         obj.sprite.setAnimation(ani.lem_run);
         // TODO new_image thing
-        obj.frame.new_image = obj.sprite.image;
+        obj.frame.new_image = obj.sprite.animation;
 
         self.setRunningSound(self.running_audio);
       }
@@ -1343,7 +1346,7 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
     if (obj.sprite.animation !== ani.lem_crazy) {
       obj.sprite.setAnimation(ani.lem_crazy);
       debugger; // TODO new_image wtf? sprite.image wtf?
-      obj.frame.new_image = obj.sprite.image;
+      obj.frame.new_image = obj.sprite.animation;
 
       self.setRunningSound(null);
     }
@@ -1368,7 +1371,7 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
       if (obj.sprite.animation !== ani.lem_climb) {
         obj.sprite.setAnimation(ani.lem_climb);
         // TODO new_image wtf
-        obj.frame.new_image = obj.sprite.image;
+        obj.frame.new_image = obj.sprite.animation;
 
         self.setRunningSound(self.ladder_audio);
       }
@@ -1391,7 +1394,7 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
       if (obj.sprite.animation !== ani.lem_climb) {
         obj.sprite.setAnimation(ani.lem_climb);
         // TODO new_image wtf
-        obj.frame.new_image = obj.sprite.image;
+        obj.frame.new_image = obj.sprite.animation;
 
         self.setRunningSound(self.ladder_audio);
       }
@@ -1411,7 +1414,7 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
     if (obj.sprite.animation !== ani[animation_name]) {
       obj.sprite.setAnimation(ani[animation_name]);
       // TODO new_image wtf?
-      obj.frame.new_image = obj.sprite.image;
+      obj.frame.new_image = obj.sprite.animation;
 
       self.playSoundAt('jump', obj.pos);
       self.setRunningSound(null);
@@ -1424,7 +1427,7 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
     if (obj.sprite.animation !== ani.lem_climb_still) {
       obj.sprite.setAnimation(ani.lem_climb_still);
       // TODO new_image wtf?
-      obj.frame.new_image = obj.sprite.image;
+      obj.frame.new_image = obj.sprite.animation;
 
       self.setRunningSound(null);
     }
@@ -1624,10 +1627,6 @@ LevelPlayer.prototype.hitButtonId = function(button_id) {
 
 LevelPlayer.prototype.load = function(cb) {
   var self = this;
-
-  for (var name in animation_offsets) {
-    ani[name].offset = animation_offsets[name];
-  }
 
   tmx.load(chem, self.level_fd, function(err, map) {
     if (err) throw err;
