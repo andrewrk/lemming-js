@@ -1571,11 +1571,11 @@ LevelPlayer.prototype.getBlockIsSolid = function(block_pos) {
   return false;
 };
 
-// TODO: do we need to delete the old sprite?
 LevelPlayer.prototype.setTile = function(block_pos, tile) {
   var unfuckedY = this.level.height - block_pos.y - 1;
   this.level.layers[0].setTileAt(block_pos.x, unfuckedY, tile);
-  old_sprite = this.sprites[0][block_pos.x][block_pos.y]
+  var old_sprite = this.sprites[0][block_pos.x][unfuckedY];
+  if (old_sprite) old_sprite.delete();
   var new_sprite = null;
   if (tile != null) {
     new_sprite = new chem.Sprite(tile.animation, {
@@ -1584,7 +1584,7 @@ LevelPlayer.prototype.setTile = function(block_pos, tile) {
       zOrder: this.layer_group[0],
     });
   }
-  this.sprites[0][block_pos.x][block_pos.y] = new_sprite;
+  this.sprites[0][block_pos.x][unfuckedY] = new_sprite;
 };
 
 LevelPlayer.prototype.garbage_collect = function(dt) {
