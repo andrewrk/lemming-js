@@ -1873,8 +1873,8 @@ LevelPlayer.prototype.load = function(cb) {
             });
             var gear = new Gear(pos, size, obj.properties.button_id, sprite, self);
             it = new Vec2d(0, 0);
-            for (it.y = pos.y; it.y < pos.y + size.y; it.y += 1) {
-              for (it.x = pos.x; it.x < pos.x + size.x; it.x += 1) {
+            for (it.y = pos_grid.y; it.y < pos_grid.y + size.y; it.y += 1) {
+              for (it.x = pos_grid.x; it.x < pos_grid.x + size.x; it.x += 1) {
                 self.buttons[it.toString()] = gear;
               }
             }
