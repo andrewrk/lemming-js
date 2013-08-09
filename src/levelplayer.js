@@ -159,6 +159,10 @@ function Gunner(pos, size, group, batch, game) {
   });
   PhysicsObject.call(this, pos, new Vec2d(0, 0), sprite, size, undefined,
       undefined, undefined, 0);
+  this.game = game;
+  this.explodable = true;
+  this.can_shoot = true;
+  this.shoot_delay = 2;
 
 }
 util.inherits(Gunner, PhysicsObject);

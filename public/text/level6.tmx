@@ -35,14 +35,6 @@
     <property name="type" value="gunner"/>
    </properties>
   </object>
-  <object name="opens the thing over there" type="Button" gid="14" x="32" y="112">
-   <properties>
-    <property name="button_id" value="0"/>
-    <property name="delay" value="2"/>
-    <property name="down_img" value="button_down.png"/>
-    <property name="up_img" value="button_up.png"/>
-   </properties>
-  </object>
   <object name="trap door" type="TrapDoor" x="1296" y="384" width="64" height="16">
    <properties>
     <property name="button_id" value="1"/>
@@ -320,6 +312,12 @@
   <object type="Button" x="1600" y="496" width="16" height="16">
    <properties>
     <property name="button_id" value="1"/>
+    <property name="delay" value="2"/>
+   </properties>
+  </object>
+  <object type="Button" x="32" y="96" width="16" height="16">
+   <properties>
+    <property name="button_id" value="0"/>
     <property name="delay" value="2"/>
    </properties>
   </object>
