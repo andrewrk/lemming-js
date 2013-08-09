@@ -681,7 +681,8 @@ LevelPlayer.prototype.loadConfig = function() {
 };
 
 LevelPlayer.prototype.getDesiredScroll = function(point) {
-  var scroll = point.minus(this.game.engine.size.scaled(0.5))
+  var unfuckedPoint = new Vec2d(point.x, this.level.height * this.level.tileHeight - point.y);
+  var scroll = unfuckedPoint.minus(this.game.engine.size.scaled(0.5))
   if (scroll.x < 0) scroll.x = 0;
   if (scroll.y < 0) scroll.y = 0;
   var maxRight = this.level.width * this.level.tileWidth - this.game.engine.size.x;
