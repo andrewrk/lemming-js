@@ -1780,7 +1780,8 @@ LevelPlayer.prototype.load = function(cb) {
               zOrder: group,
             });
             var bridge = new Bridge(bridge_pos_grid, bridge_size, state, up_sprite, down_sprite);
-            self.button_responders[button_id] = bridge;
+            if (!self.button_responders[button_id]) self.button_responders[button_id] = [];
+            self.button_responders[button_id].push(bridge);
             self.platform_objects.push(bridge);
             break;
           case 'TrapDoor':
@@ -1793,8 +1794,11 @@ LevelPlayer.prototype.load = function(cb) {
               batch: self.batch_level,
               zOrder: group,
             });
-            self.button_responders[obj.properties.button_id] = new TrapDoor(pos_grid, size,
-                obj.properties.state, sprite, self);
+            if (!self.button_responders[obj.properties.button_id]) {
+              self.button_responders[obj.properties.button_id] = [];
+            }
+            self.button_responders[obj.properties.button_id].push(new TrapDoor(pos_grid, size,
+                obj.properties.state, sprite, self));
             break;
           case 'Button':
             up_img = chem.resources.images['button_up.png'];
@@ -1862,8 +1866,11 @@ LevelPlayer.prototype.load = function(cb) {
               zOrder: group,
               batch: self.batch_level,
             });
-            self.button_responders[obj.properties.button_id] = new ConveyorBelt(pos_grid,
-                size, sprite, self, state, direction);
+            if (!self.button_responders[obj.properties.button_id]) {
+              self.button_responders[obj.properties.button_id] = [];
+            }
+            self.button_responders[obj.properties.button_id].push(new ConveyorBelt(pos_grid,
+                size, sprite, self, state, direction));
             break;
           case 'BombSpawner':
             pos = new Vec2d(obj.x, translate_y(obj.y, obj.height));
@@ -1875,7 +1882,10 @@ LevelPlayer.prototype.load = function(cb) {
             var fuse_max = obj.properties.fuse_max == null ? 3 :
               parseFloat(obj.properties.fuse_max, 10);
             var spawner = new BombSpawner(pos, size, self, delay, state, fuse_min, fuse_max);
-            self.button_responders[obj.properties.button_id] = spawner;
+            if (!self.button_responders[obj.properties.button_id]) {
+              self.button_responders[obj.properties.button_id] = [];
+            }
+            self.button_responders[obj.properties.button_id].push(spawner);
             break;
         }
       });
@@ -1941,7 +1951,10 @@ LevelPlayer.prototype.spawnBomb = function(pos, vel, fuse) {
 LevelPlayer.prototype.playSoundAt = function(sfx_name, pos) {
   var audio = this.sfx[sfx_name].play();
   var zero_volume_distance_sqrd = 640000;
-  audio.volume = 1 - pos.distanceSqrd(this.scroll.plus(this.game.engine.size.scaled(0.5))) / zero_volume_distance_sqrd;
+  var vol = 1 - pos.distanceSqrd(this.scroll.plus(this.game.engine.size.scaled(0.5))) / zero_volume_distance_sqrd;
+  if (vol < 0) vol = 0;
+  if (vol > 1) vol = 1;
+  audio.volume = vol;
   return audio;
 };
 
