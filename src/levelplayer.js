@@ -1598,6 +1598,11 @@ LevelPlayer.prototype.getTile = function(block_pos, layer_index) {
   // this function must unfuck the y coordinate
   layer_index = layer_index == null ? 0 : layer_index;
   var unfuckedY = this.level.height - block_pos.y - 1;
+  if (block_pos.x < 0 || block_pos.x >= this.level.width ||
+      unfuckedY < 0 || unfuckedY >= this.level.height)
+  {
+    return this.tilesEnum.Air;
+  }
   return this.level.layers[layer_index].tileAt(block_pos.x, unfuckedY);
 };
 

@@ -7,7 +7,7 @@ function WinScreen(game) {
 }
 
 WinScreen.prototype.start = function() {
-  this.img_bg = chem.resources.images('credits_bg.png');
+  this.img_bg = chem.resources.images['credits_bg.png'];
   this.bg_music = new Audio("music/glitch.mp3");
   this.bg_music.volume = 0.50;
   this.bg_music.loop = true;
