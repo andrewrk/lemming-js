@@ -83,7 +83,7 @@ exports.spritesheet = {
       delay: 0.05,
     },
     house: {
-      anchor: 'bottomleft',
+      anchor: 'topleft',
     },
     monster_still: {
       anchor: 'bottomleft',

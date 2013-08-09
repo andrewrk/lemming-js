@@ -4,6 +4,7 @@ var ani = chem.resources.animations;
 var util = require('util');
 var modulus = require('./euclidean_mod');
 var tmx = require('chem-tmx');
+var animation_offsets = require('./animation_offsets');
 
 exports.LevelPlayer = LevelPlayer;
 
@@ -384,8 +385,9 @@ ConveyorBelt.prototype.toggle = function() {
 };
 
 ConveyorBelt.prototype.setCorrectPosition = function() {
-  // TODO double check this - it relies on animation offset
-  this.sprite.pos = this.pos.times(tile_size).plus(this.game.animation_offset[this.sprite.animationName]);
+  var unfuckedY = this.game.level.height - this.pos.y - 1;
+  this.sprite.pos.x = this.pos.x * tile_size;
+  this.sprite.pos.y = unfuckedY * tile_size;
 };
 
 function Bridge(pos, size, state, up_sprite, down_sprite) {
@@ -1050,17 +1052,16 @@ LevelPlayer.prototype.update = function(dt, dx) {
       debugger; // is this right?
       lemming.sprite.setAnimation(lemming.frame.new_image)
     }
-    // TODO: double check - it relies on animation offset
-    lemming.sprite.pos = lemming.frame.pos.plus(
-        self.animation_offset[lemming.sprite.animationName]);
+    lemming.sprite.pos = lemming.frame.pos.plus(lemming.sprite.animation.offset);
+    lemming.sprite.pos.y = self.level.height * self.level.tileHeight - lemming.sprite.pos.y;
   }
 
   function prepareObjSprite(obj) {
     if (obj.gone) return;
-    // TODO animation_offset
-    var offset = self.animation_offset[obj.sprite.animationName];
+    var offset = obj.sprite.animation.offset;
     if (offset == null) offset = new Vec2d(0, 0);
     obj.sprite.pos = obj.pos.plus(offset);
+    obj.sprite.pos.y = self.level.height * self.level.tileHeight - obj.sprite.pos.y;
   }
 
   function doPhysics(obj) {
@@ -1623,6 +1624,10 @@ LevelPlayer.prototype.hitButtonId = function(button_id) {
 
 LevelPlayer.prototype.load = function(cb) {
   var self = this;
+
+  for (var name in animation_offsets) {
+    ani[name].offset = animation_offsets[name];
+  }
 
   tmx.load(chem, self.level_fd, function(err, map) {
     if (err) throw err;
