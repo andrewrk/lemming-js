@@ -4,7 +4,6 @@ var ani = chem.resources.animations;
 var util = require('util');
 var modulus = require('./euclidean_mod');
 var tmx = require('chem-tmx');
-var animation_offsets = require('./animation_offsets');
 
 exports.LevelPlayer = LevelPlayer;
 
@@ -116,8 +115,6 @@ Tank.prototype.think = function(dt) {
 Tank.prototype.changeDirection = function(new_dir) {
   if (new_dir === this.direction) return;
   this.direction = new_dir;
-  // TODO: instead of using a minus sign for flipped animations,
-  // just flip the sprite.
   var name;
   if (this.direction < 0) {
     name = '-tank_point';
@@ -139,7 +136,6 @@ Tank.prototype.wantToShoot = function() {
   var bullet_init_vel = new Vec2d(350*self.direction, 300);
   self.game.spawnBomb(self.pos.plus(gun_offset), self.vel.plus(bullet_init_vel), 1);
 
-  // TODO minus thing :-/
   var name;
   if (self.direction < 0) {
     name = '-tank_shoot';
@@ -208,7 +204,6 @@ Gunner.prototype.wantToShoot = function() {
   var bullet_init_vel = new Vec2d(1100*self.direction, 200);
   self.game.spawnBullet(self.pos.plus(gun_offset), self.vel.plus(bullet_init_vel));
 
-  // TODO minus thing
   var name = self.direction < 0 ? '-gunner_shoot' : 'gunner_shoot';
   self.sprite.setAnimation(ani[name]);
 
@@ -220,7 +215,6 @@ Gunner.prototype.wantToShoot = function() {
 Gunner.prototype.changeDirection = function(new_dir) {
   if (new_dir === this.direction) return;
   this.direction = new_dir;
-  // TODO minus thing
   var name;
   if (this.direction < 0) {
     name = '-gunner_point';
@@ -299,7 +293,6 @@ Bullet.prototype.think = function(dt) {
 };
 
 function Monster(pos, size, group, batch, game, direction, throw_vel) {
-  // TODO - flip the sprite instead of using minus sign
   var negate = direction > 0 ? '' : '-';
   var sprite = new chem.Sprite(ani[negate+'monster_still'], {
     pos: pos.clone(),
@@ -352,9 +345,8 @@ function ConveyorBelt(pos, size, sprite, game, state, direction) {
   this.state = state == null ? true : state === 'on';
   this.direction = sign(direction == null ? 1 : direction);
   // reversed because animation is backwards
-  // TODO flip sprite instead of minus thing
   this.animations = {
-    '-1': ani['belt_on'],
+    '-1': ani.belt_on,
     '1': ani['-belt_on'],
   };
   this.toggle();
@@ -366,7 +358,6 @@ ConveyorBelt.prototype.toggle = function() {
 
   var new_tile;
   if (this.state) {
-    // TODO minus thing
     this.sprite.setAnimation(this.animations[this.direction]);
     this.setCorrectPosition();
 
@@ -618,10 +609,12 @@ LevelPlayer.prototype.setRunningSound = function(source) {
 };
 
 LevelPlayer.prototype.loadImages = function() {
-  // TODO: generate the minus animations?
   var name;
-  for (name in animation_offsets) {
-    ani[name].offset = animation_offsets[name];
+  for (name in ani) {
+    var anim = ani[name];
+    var revName = '-' + name;
+    ani[revName] = anim;
+    // TODO: actually generate flipped animations
   }
 
   this.img_hud = chem.Animation.fromImage(chem.resources.images['hud.png']);
@@ -788,7 +781,6 @@ LevelPlayer.prototype.getGrabbedBy = function(monster, throw_vel) {
   self.held_by = monster;
 
   // hide sprite until throw animation is over
-  // TODO: minus thing
   var negate = "";
   if (monster.direction < 0) negate = '-';
   monster.sprite.setAnimation(ani[negate+"monster_throw"]);
@@ -952,7 +944,6 @@ LevelPlayer.prototype.update = function(dt, dx) {
 
       old_head_lemming = self.lemmings[self.control_lemming];
       var direction = sign(old_head_lemming.frame.vel.x);
-      // TODO minus thing
       var animationName;
       if (direction < 0)  {
         animationName = '-lem_belly_flop';
@@ -1061,10 +1052,8 @@ LevelPlayer.prototype.update = function(dt, dx) {
 
   function prepareObjSprite(obj) {
     if (obj.gone) return;
-    var offset = obj.sprite.animation.offset;
-    if (offset == null) offset = new Vec2d(0, 0);
-    obj.sprite.pos = obj.pos.plus(offset);
-    obj.sprite.pos.y = self.level.height * self.level.tileHeight - obj.sprite.pos.y;
+    obj.sprite.pos.x = obj.pos.x;
+    obj.sprite.pos.y = self.level.height * self.level.tileHeight - obj.pos.y;
   }
 
   function doPhysics(obj) {
@@ -1277,7 +1266,6 @@ function doItemPickups(self, obj, tiles_at_feet, char, corner_foot_block,
         self.setTile(corner_foot_block.offset(1, 0), self.tilesEnum.DeadBodyMiddle);
       }
 
-      // TODO minus thing
       var negate = "";
       if (obj.vel.x < 0) negate = '-';
       var sprite = new chem.Sprite(ani[negate+'lem_die'], {
@@ -1316,10 +1304,8 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
 
     // switch sprite to running left
     if (on_ground) {
-      // TODO minus thing
       if (obj.sprite.animation !== ani['-lem_run']) {
         obj.sprite.setAnimation(ani['-lem_run']);
-        // TODO new_image thing
         obj.frame.new_image = obj.sprite.animation;
 
         self.setRunningSound(self.running_audio);
@@ -1336,7 +1322,6 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
     if (on_ground) {
       if (obj.sprite.animation !== ani.lem_run) {
         obj.sprite.setAnimation(ani.lem_run);
-        // TODO new_image thing
         obj.frame.new_image = obj.sprite.animation;
 
         self.setRunningSound(self.running_audio);
@@ -1370,7 +1355,6 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
       // switch sprite to ladder
       if (obj.sprite.animation !== ani.lem_climb) {
         obj.sprite.setAnimation(ani.lem_climb);
-        // TODO new_image wtf
         obj.frame.new_image = obj.sprite.animation;
 
         self.setRunningSound(self.ladder_audio);
@@ -1393,7 +1377,6 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
       // switch sprite to ladder
       if (obj.sprite.animation !== ani.lem_climb) {
         obj.sprite.setAnimation(ani.lem_climb);
-        // TODO new_image wtf
         obj.frame.new_image = obj.sprite.animation;
 
         self.setRunningSound(self.ladder_audio);
@@ -1408,12 +1391,10 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
     // switch sprite to jump
     var animation_name = 'lem_jump';
     if (obj.vel.x < 0) {
-      // TODO minus thing
       animation_name = '-' + animation_name;
     }
     if (obj.sprite.animation !== ani[animation_name]) {
       obj.sprite.setAnimation(ani[animation_name]);
-      // TODO new_image wtf?
       obj.frame.new_image = obj.sprite.animation;
 
       self.playSoundAt('jump', obj.pos);
@@ -1426,7 +1407,6 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
     // switch sprite to ladder, still
     if (obj.sprite.animation !== ani.lem_climb_still) {
       obj.sprite.setAnimation(ani.lem_climb_still);
-      // TODO new_image wtf?
       obj.frame.new_image = obj.sprite.animation;
 
       self.setRunningSound(null);

@@ -6,8 +6,8 @@
     "dev": "npm install && chem dev"
   },
   "dependencies": {
-    "chem-cli": "~1.0.9",
-    "chem": "~3.0.0",
+    "chem-cli": "~1.0.10",
+    "chem": "~3.1.0",
     "chem-tmx": "~2.0.5"
   },
   "repository": {
