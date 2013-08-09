@@ -563,6 +563,7 @@ function LevelPlayer(game, level_fd) {
   this.batch_bg2 = new chem.Batch();
   this.batch_bg1 = new chem.Batch();
   this.batch_level = new chem.Batch();
+  this.batch_tiles = new chem.Batch();
   this.batch_static = new chem.Batch();
 
   this.loadConfig();
@@ -692,7 +693,9 @@ LevelPlayer.prototype.clear = function() {
   }
   this.intervals = null;
 
-  this.bg_music.pause();
+  if (this.bg_music) {
+    this.bg_music.pause();
+  }
   this.bg_music = null;
 
   this.lemmings = null;
@@ -712,6 +715,8 @@ LevelPlayer.prototype.clear = function() {
   this.batch_level = null;
   this.batch_static.clear();
   this.batch_static = null;
+  this.batch_tiles.clear();
+  this.batch_tiles = null;
 
   this.stopRunningSound();
 };
@@ -892,7 +897,9 @@ LevelPlayer.prototype.handleGameOver = function() {
 LevelPlayer.prototype.handleVictory = function() {
   var self = this;
 
-  self.bg_music.pause();
+  if (self.bg_music) {
+    self.bg_music.pause();
+  }
   self.sfx.winnar.play();
 
   setTimeout(goNext, 4000);
@@ -1054,6 +1061,11 @@ LevelPlayer.prototype.update = function(dt, dx) {
     }
     lemming.sprite.pos.x = lemming.frame.pos.x;
     lemming.sprite.pos.y = self.level.height * self.level.tileHeight - lemming.frame.pos.y;
+  }
+
+  if (self.renderTilesPending) {
+    self.renderTilesPending = false;
+    self.renderTiles();
   }
 
   function prepareObjSprite(obj) {
@@ -1516,6 +1528,12 @@ function resolve_y(self, obj, new_pos, vel, obj_size) {
   return false;
 }
 
+LevelPlayer.prototype.renderTiles = function() {
+  var context = this.tileCanvas.getContext('2d');
+  context.clearRect(0, 0, this.tileCanvas.width, this.tileCanvas.height);
+  this.batch_tiles.draw(context);
+};
+
 LevelPlayer.prototype.on_draw = function(context) {
   // far background
   var far_bgpos = new Vec2d(
@@ -1544,9 +1562,16 @@ LevelPlayer.prototype.on_draw = function(context) {
   this.batch_bg1.draw(context);
 
   // level
-  var floored_scroll = this.scroll.floored().scale(-1);
+  var floored_scroll = this.scroll.floored();
   context.setTransform(1, 0, 0, 1, 0, 0); // load identity
-  context.translate(floored_scroll.x, floored_scroll.y);
+  // tiles
+  context.drawImage(this.tileCanvas,
+      floored_scroll.x, floored_scroll.y,
+      this.game.engine.size.x, this.game.engine.size.y,
+      0, 0,
+      this.game.engine.size.x, this.game.engine.size.y);
+  context.translate(-floored_scroll.x, -floored_scroll.y);
+  // rest of level
   this.batch_level.draw(context);
 
   // hud
@@ -1582,9 +1607,13 @@ LevelPlayer.prototype.setTile = function(block_pos, tile) {
   var unfuckedY = this.level.height - block_pos.y - 1;
   this.level.layers[0].setTileAt(block_pos.x, unfuckedY, tile);
   var old_sprite = this.sprites[0][block_pos.x][unfuckedY];
-  if (old_sprite) old_sprite.delete();
+  if (old_sprite) {
+    old_sprite.delete();
+    this.renderTilesPending = true;
+  }
   var new_sprite = null;
   if (tile != null) {
+    this.renderTilesPending = true;
     new_sprite = new chem.Sprite(tile.animation, {
       pos: new Vec2d(this.level.tileWidth * block_pos.x, this.level.tileHeight * unfuckedY),
       batch: this.batch_level,
@@ -1618,6 +1647,9 @@ LevelPlayer.prototype.load = function(cb) {
     self.level = map;
 
     tile_size = new Vec2d(self.level.tileWidth, self.level.tileHeight);
+    self.tileCanvas = document.createElement('canvas');
+    self.tileCanvas.width = self.level.tileWidth * self.level.width;
+    self.tileCanvas.height = self.level.tileHeight * self.level.height;
 
     self.loadImages();
     self.loadSoundEffects();
@@ -1663,13 +1695,14 @@ LevelPlayer.prototype.load = function(cb) {
           if (tile) {
             self.sprites[tileLayerIndex][xtile][ytile] = new chem.Sprite(tile.animation, {
               pos: new Vec2d(self.level.tileWidth * xtile, self.level.tileHeight * ytile),
-              batch: self.batch_level,
+              batch: self.batch_tiles,
               zOrder: group,
             });
           }
         }
       }
     }
+    self.renderTilesPending = true;
 
     var had_player_layer = false;
     var had_start_point = false;
