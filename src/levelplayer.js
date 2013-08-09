@@ -1080,7 +1080,7 @@ LevelPlayer.prototype.update = function(dt, dx) {
       var unit_vector_vel = obj.vel.normalized();
       var last_one = false;
       while (! last_one) {
-        vector_it.add(unit_vector_vel.divBy(tile_size));
+        vector_it.add(unit_vector_vel.times(tile_size));
         if (obj.pos.distanceSqrd(new_pos) < obj.pos.distanceSqrd(vector_it)) {
           last_one = true;
           vector_it = new_pos;
