@@ -8,8 +8,7 @@ using the [chem game engine](https://github.com/superjoe30/chem/).
 
 ## Status
 
-It's almost playable. Glitchy and slow.
-Still working out some of the bugs introduced by porting.
+It's playable now but I am still working out some of the bugs introduced by porting.
 
 ## Developing
 

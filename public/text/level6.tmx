@@ -288,16 +288,6 @@
     <property name="direction" value="-1"/>
    </properties>
   </object>
-  <object name="gun man" type="Agent" x="992" y="448" width="32" height="64">
-   <properties>
-    <property name="type" value="gunner"/>
-   </properties>
-  </object>
-  <object name="gun man" type="Agent" x="1328" y="656" width="32" height="64">
-   <properties>
-    <property name="type" value="gunner"/>
-   </properties>
-  </object>
   <object name="gun man" type="Agent" x="1648" y="320" width="32" height="64">
    <properties>
     <property name="type" value="gunner"/>
