@@ -1906,8 +1906,7 @@ LevelPlayer.prototype.load = function(cb) {
     if (bg_music_src) {
       self.bg_music = new Audio(bg_music_src);
       self.bg_music.loop = true;
-      // TODO uncomment this
-      //self.bg_music.play();
+      self.bg_music.play();
     }
 
     cb();
