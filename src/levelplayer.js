@@ -397,8 +397,8 @@ util.inherits(Bridge, PlatformObject);
 
 Bridge.prototype.toggle = function() {
   this.state_up = ! this.state_up;
-  this.up_sprite.visible = this.state_up;
-  this.down_sprite.visible = !this.state_up;
+  this.up_sprite.setVisible(this.state_up);
+  this.down_sprite.setVisible(!this.state_up);
 };
 
 Bridge.prototype.solidAt = function(pos) {
@@ -425,11 +425,11 @@ TrapDoor.prototype.toggle = function() {
   var new_tile;
   if (this.state === 'closed') {
     this.state = 'open';
-    this.sprite.visible = false;
+    this.sprite.setVisible(false);
     new_tile = this.game.tilesEnum.Air;
   } else {
     this.state = 'closed';
-    this.sprite.visible = true;
+    this.sprite.setVisible(true);
     new_tile = this.game.tilesEnum.SolidInvisible;
   }
   var it = new Vec2d(0, 0);
@@ -508,8 +508,8 @@ Button.prototype.hit = function(who_done_it) {
 
 Button.prototype.changeState = function(value) {
   this.state_down = value;
-  this.up_sprite.visible = !this.state_down;
-  this.down_sprite.visible = this.state_down
+  this.up_sprite.setVisible(!this.state_down);
+  this.down_sprite.setVisible(this.state_down);
 };
 
 function BombSpawner(pos, size, game, delay, state, fuse_min, fuse_max) {
@@ -777,7 +777,7 @@ LevelPlayer.prototype.afterLoad = function() {
 LevelPlayer.prototype.getGrabbedBy = function(monster, throw_vel) {
   var self = this;
   self.lemmings[self.control_lemming].frame.vel = new Vec2d(0, 0);
-  self.lemmings[self.control_lemming].sprite.visible = false;
+  self.lemmings[self.control_lemming].sprite.setVisible(false);
   self.held_by = monster;
 
   // hide sprite until throw animation is over
@@ -792,7 +792,7 @@ LevelPlayer.prototype.getGrabbedBy = function(monster, throw_vel) {
     self.lemmings[self.control_lemming].frame.pos = new Vec2d(
         monster.pos.x + (1+monster.direction)*self.level.tileWidth,
         monster.pos.y);
-    self.lemmings[self.control_lemming].sprite.visible = true;
+    self.lemmings[self.control_lemming].sprite.setVisible(true);
     self.held_by = null;
     setTimeout(not_grabbing, 2000);
     self.sfx[['weee', 'woopee'][Math.floor(Math.random() * 2)]].play();
@@ -1575,6 +1575,7 @@ LevelPlayer.prototype.getBlockIsSolid = function(block_pos) {
 LevelPlayer.prototype.setTile = function(block_pos, tile) {
   var unfuckedY = this.level.height - block_pos.y - 1;
   this.level.layers[0].setTileAt(block_pos.x, unfuckedY, tile);
+  old_sprite = this.sprites[0][block_pos.x][block_pos.y]
   var new_sprite = null;
   if (tile != null) {
     new_sprite = new chem.Sprite(tile.animation, {
@@ -1650,20 +1651,10 @@ LevelPlayer.prototype.load = function(cb) {
       var group = self.getNextGroupNum();
       self.layer_group.push(group);
       for (var ytile = 0; ytile < self.level.height; ytile += 1) {
-        // To compensate for pyglet's upside-down y-axis, the Sprites are
-        // placed in rows that are backwards compared to what was loaded
-        // into the map. The next operation puts all rows upside-down.
-
-        // now that we are using chem, the Y-axis is no longer fucked.
-        // but it's probably harder to refactor all the physics and
-        // calculations than it is to mess with the sprites right before display.
-        // So I'm going to leave this shit in here for now.
-        var flippedY = self.level.height - ytile - 1;
-
         for (var xtile = 0; xtile < self.level.width; xtile += 1) {
           var tile = layer.tileAt(xtile, ytile);
           if (tile) {
-            self.sprites[tileLayerIndex][xtile][flippedY] = new chem.Sprite(tile.animation, {
+            self.sprites[tileLayerIndex][xtile][ytile] = new chem.Sprite(tile.animation, {
               pos: new Vec2d(self.level.tileWidth * xtile, self.level.tileHeight * ytile),
               batch: self.batch_level,
               zOrder: group,
@@ -1770,12 +1761,12 @@ LevelPlayer.prototype.load = function(cb) {
             var bridge_pos_grid = bridge_pos.divBy(tile_size).floor();
             var bridge_size = (new Vec2d(obj.width, obj.height)).div(tile_size).floor();
             up_sprite = new chem.Sprite(up_anim, {
-              pos: bridge_pos.clone(),
+              pos: new Vec2d(obj.x, obj.y),
               batch: self.batch_level,
               zOrder: group,
             });
             down_sprite = new chem.Sprite(down_anim, {
-              pos: bridge_pos.clone(),
+              pos: new Vec2d(obj.x, obj.y),
               batch: self.batch_level,
               zOrder: group,
             });
@@ -1790,7 +1781,7 @@ LevelPlayer.prototype.load = function(cb) {
             var pos_grid = pos.divBy(tile_size).floor();
             size = (new Vec2d(obj.width, obj.height)).div(tile_size).floor();
             sprite = new chem.Sprite(anim, {
-              pos: pos.clone(),
+              pos: new Vec2d(obj.x, obj.y),
               batch: self.batch_level,
               zOrder: group,
             });
@@ -1815,12 +1806,12 @@ LevelPlayer.prototype.load = function(cb) {
             var button_pos = new Vec2d(obj.x, translate_y(obj.y, obj.height));
             var button_pos_grid = button_pos.divBy(tile_size).floor();
             up_sprite = new chem.Sprite(up_anim, {
-              pos: button_pos.clone(),
+              pos: new Vec2d(obj.x, obj.y),
               batch: self.batch_level,
               zOrder: group,
             });
             down_sprite = new chem.Sprite(down_anim, {
-              pos: button_pos.clone(),
+              pos: new Vec2d(obj.x, obj.y),
               batch: self.batch_level,
               zOrder: group,
             });
@@ -1832,7 +1823,7 @@ LevelPlayer.prototype.load = function(cb) {
             size = (new Vec2d(obj.width, obj.height)).div(tile_size).floor();
             pos_grid = pos.divBy(tile_size).floor();
             sprite = new chem.Sprite(ani.gear_turning, {
-              pos: pos.clone(),
+              pos: new Vec2d(obj.x, obj.y),
               batch: self.batch_level,
               zOrder: group,
             });
@@ -1862,7 +1853,7 @@ LevelPlayer.prototype.load = function(cb) {
             direction = obj.properties.direction == null ? 1 :
               parseInt(obj.properties.direction, 10);
             sprite = new chem.Sprite(ani.belt_on, {
-              pos: pos.clone(),
+              pos: new Vec2d(obj.x, obj.y),
               zOrder: group,
               batch: self.batch_level,
             });
