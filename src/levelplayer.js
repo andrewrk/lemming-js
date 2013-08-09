@@ -788,6 +788,7 @@ LevelPlayer.prototype.getGrabbedBy = function(monster, throw_vel) {
   var negate = "";
   if (monster.direction < 0) negate = '-';
   monster.sprite.setAnimation(ani[negate+"monster_throw"]);
+  monster.sprite.setFrameIndex(0);
   monster.sprite.once('animationend', reset_animation);
 
   function reset_animation() {
