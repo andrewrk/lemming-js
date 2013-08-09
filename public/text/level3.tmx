@@ -26,21 +26,13 @@
     <property name="up_img" value="bridge_up.png"/>
    </properties>
   </object>
-  <object type="Button" gid="14" x="704" y="96">
-   <properties>
-    <property name="button_id" value="bridge"/>
-    <property name="delay" value="2"/>
-    <property name="down_img" value="button_down.png"/>
-    <property name="up_img" value="button_up.png"/>
-   </properties>
-  </object>
   <object name="winnar" type="Victory" x="0" y="288" width="160" height="112"/>
-  <object name="winnar sign" type="Decoration" x="48" y="368" width="80" height="32">
+  <object name="winnar sign" type="Decoration" x="48" y="352" width="80" height="48">
    <properties>
     <property name="img" value="winnar.png"/>
    </properties>
   </object>
-  <object type="Decoration" x="448" y="688" width="80" height="32">
+  <object type="Decoration" x="448" y="672" width="80" height="48">
    <properties>
     <property name="img" value="skull_sign.png"/>
    </properties>
@@ -49,6 +41,12 @@
    <properties>
     <property name="direction" value="-1"/>
     <property name="type" value="monster"/>
+   </properties>
+  </object>
+  <object type="Button" x="704" y="80" width="16" height="16">
+   <properties>
+    <property name="button_id" value="bridge"/>
+    <property name="delay" value="2"/>
    </properties>
   </object>
  </objectgroup>

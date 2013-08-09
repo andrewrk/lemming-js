@@ -22,14 +22,6 @@
    </properties>
   </object>
   <object name="StartPoint" type="StartPoint" x="272" y="1184" width="64" height="64"/>
-  <object type="Button" gid="14" x="48" y="832">
-   <properties>
-    <property name="button_id" value="monster_bridge"/>
-    <property name="delay" value="2"/>
-    <property name="down_img" value="button_down.png"/>
-    <property name="up_img" value="button_up.png"/>
-   </properties>
-  </object>
   <object name="bridge" type="Bridge" x="384" y="1024" width="96" height="96">
    <properties>
     <property name="button_id" value="monster_bridge"/>
@@ -38,7 +30,7 @@
     <property name="up_img" value="bridge_up.png"/>
    </properties>
   </object>
-  <object type="Decoration" x="2560" y="1168" width="80" height="32">
+  <object type="Decoration" x="2560" y="1152" width="80" height="48">
    <properties>
     <property name="img" value="winnar.png"/>
    </properties>
@@ -48,6 +40,12 @@
    <properties>
     <property name="direction" value="-1"/>
     <property name="type" value="monster"/>
+   </properties>
+  </object>
+  <object type="Button" x="48" y="816" width="16" height="16">
+   <properties>
+    <property name="button_id" value="monster_bridge"/>
+    <property name="delay" value="2"/>
    </properties>
   </object>
  </objectgroup>

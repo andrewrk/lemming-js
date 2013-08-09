@@ -269,7 +269,7 @@ Bullet.prototype.think = function(dt) {
   var unit_vector_vel = this.vel.normalized();
   var last_one = false;
   while (! last_one) {
-    vector_it.add(unit_vector_vel.divBy(tile_size));
+    vector_it.add(unit_vector_vel.times(tile_size));
     // if we hit something solid, die
     if (old_prev_pos.distanceSqrd(this.pos) < old_prev_pos.distanceSqrd(vector_it)) {
       last_one = true;
@@ -704,9 +704,13 @@ LevelPlayer.prototype.clear = function() {
   this.buttons = null;
   this.victory = null;
 
+  this.batch_bg2.clear();
   this.batch_bg2 = null;
+  this.batch_bg1.clear();
   this.batch_bg1 = null;
+  this.batch_level.clear();
   this.batch_level = null;
+  this.batch_static.clear();
   this.batch_static = null;
 
   this.stopRunningSound();
@@ -872,7 +876,9 @@ LevelPlayer.prototype.handleExplosion = function(pos, vel, caused_by_self) {
 LevelPlayer.prototype.handleGameOver = function() {
   var self = this;
 
-  self.bg_music.pause();
+  if (self.bg_music) {
+    self.bg_music.pause();
+  }
   self.sfx.game_over.play();
 
   setTimeout(restart, 4000);

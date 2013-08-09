@@ -18,19 +18,13 @@
  </layer>
  <objectgroup name="Objects" width="240" height="100">
   <object name="start" type="StartPoint" x="320" y="816" width="32" height="64"/>
-  <object type="Button" gid="14" x="512" y="880">
-   <properties>
-    <property name="button_id" value="beginning"/>
-    <property name="delay" value="999999"/>
-   </properties>
-  </object>
   <object name="bridge" type="Bridge" x="416" y="800" width="96" height="96">
    <properties>
     <property name="button_id" value="beginning"/>
     <property name="state" value="down"/>
    </properties>
   </object>
-  <object name="sign post" type="Decoration" x="3584" y="720" width="80" height="32">
+  <object name="sign post" type="Decoration" x="3584" y="704" width="80" height="48">
    <properties>
     <property name="img" value="winnar.png"/>
    </properties>
@@ -86,11 +80,6 @@
    <properties>
     <property name="button_id" value="bonus"/>
     <property name="state" value="up"/>
-   </properties>
-  </object>
-  <object type="Button" gid="14" x="1984" y="1088">
-   <properties>
-    <property name="button_id" value="bonus"/>
    </properties>
   </object>
   <object name="monster" type="Agent" x="2144" y="1328" width="48" height="48">
@@ -150,6 +139,17 @@
     <property name="throw_vel_x" value="-1200"/>
     <property name="throw_vel_y" value="300"/>
     <property name="type" value="monster"/>
+   </properties>
+  </object>
+  <object type="Button" x="512" y="864" width="16" height="16">
+   <properties>
+    <property name="button_id" value="beginning"/>
+    <property name="delay" value="999999"/>
+   </properties>
+  </object>
+  <object type="Button" x="1984" y="1072" width="16" height="16">
+   <properties>
+    <property name="button_id" value="bonus"/>
    </properties>
   </object>
  </objectgroup>

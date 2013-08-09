@@ -50,14 +50,6 @@
     <property name="state" value="closed"/>
    </properties>
   </object>
-  <object type="Button" gid="14" x="1600" y="512">
-   <properties>
-    <property name="button_id" value="1"/>
-    <property name="delay" value="2"/>
-    <property name="down_img" value="button_down.png"/>
-    <property name="up_img" value="button_up.png"/>
-   </properties>
-  </object>
   <object type="ConveyorBelt" x="176" y="1088" width="64" height="16">
    <properties>
     <property name="button_id" value="main_belt"/>
@@ -286,7 +278,7 @@
     <property name="type" value="monster"/>
    </properties>
   </object>
-  <object name="sign" type="Decoration" x="1888" y="1504" width="80" height="32">
+  <object name="sign" type="Decoration" x="1888" y="1488" width="80" height="48">
    <properties>
     <property name="img" value="winnar.png"/>
    </properties>
@@ -323,6 +315,12 @@
    <properties>
     <property name="direction_lock" value="1"/>
     <property name="type" value="tank"/>
+   </properties>
+  </object>
+  <object type="Button" x="1600" y="496" width="16" height="16">
+   <properties>
+    <property name="button_id" value="1"/>
+    <property name="delay" value="2"/>
    </properties>
   </object>
  </objectgroup>

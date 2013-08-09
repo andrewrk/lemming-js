@@ -18,12 +18,6 @@
  </layer>
  <objectgroup name="Object Layer 1" width="300" height="100">
   <object name="start" type="StartPoint" x="256" y="1120" width="32" height="64"/>
-  <object type="Button" gid="14" x="128" y="1184">
-   <properties>
-    <property name="button_id" value="belt"/>
-    <property name="delay" value="2"/>
-   </properties>
-  </object>
   <object name="bomb spawner" type="BombSpawner" x="3088" y="800" width="1616" height="32">
    <properties>
     <property name="button_id" value="spawner"/>
@@ -41,7 +35,7 @@
     <property name="type" value="monster"/>
    </properties>
   </object>
-  <object name="sign" type="Decoration" x="4624" y="1008" width="80" height="32">
+  <object name="sign" type="Decoration" x="4624" y="992" width="80" height="48">
    <properties>
     <property name="img" value="winnar.png"/>
    </properties>
@@ -117,5 +111,12 @@
    </properties>
   </object>
  </objectgroup>
- <objectgroup name="PlayerLayer" width="300" height="100" visible="0"/>
+ <objectgroup name="PlayerLayer" width="300" height="100">
+  <object type="Button" x="128" y="1168" width="16" height="16">
+   <properties>
+    <property name="button_id" value="belt"/>
+    <property name="delay" value="2"/>
+   </properties>
+  </object>
+ </objectgroup>
 </map>

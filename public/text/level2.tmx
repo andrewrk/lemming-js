@@ -30,7 +30,7 @@
    </properties>
   </object>
   <object name="winnar" type="Victory" x="1152" y="304" width="160" height="112"/>
-  <object name="winnar sign" type="Decoration" x="1200" y="384" width="80" height="32">
+  <object name="winnar sign" type="Decoration" x="1200" y="368" width="80" height="48">
    <properties>
     <property name="img" value="winnar.png"/>
    </properties>
