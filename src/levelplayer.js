@@ -842,7 +842,7 @@ LevelPlayer.prototype.handleExplosion = function(pos, vel, caused_by_self) {
       if (pt.distance(block_pos) <= explosion_power) {
         // affect block
         var tile = this.getTile(pt);
-        if (tile.breakable) this.setTile(pt, this.tilesEnum.Air);
+        if (tileBreakable(tile)) this.setTile(pt, this.tilesEnum.Air);
       }
     }
   }
@@ -1149,8 +1149,8 @@ LevelPlayer.prototype.update = function(dt, dx) {
 
     var belt_velocity = 800;
     tiles_at_feet.forEach(function(tile) {
-      if (tile.belt == null) return;
-      apply_belt_velocity += tile.belt * belt_velocity * dt;
+      if (tileBelt(tile) == null) return;
+      apply_belt_velocity += tileBelt(tile) * belt_velocity * dt;
     });
 
     if (obj === char) {
@@ -1216,19 +1216,19 @@ function doItemPickups(self, obj, tiles_at_feet, char, corner_foot_block,
 
       // +1
       if (self.control_lemming - self.plus_ones_queued > 0) {
-        if (tile.id === self.tilesEnum.PlusOne) {
+        if (tile === self.tilesEnum.PlusOne) {
           self.plus_ones_queued += 1;
           self.setTile(block, self.tilesEnum.Air);
           var sfx_player = self.playSoundAt('coin_pickup', block.times(tile_size));
           sfx_player.playbackRate = 2 - (self.lemmings.length - self.control_lemming - 1) / self.lemmings.length;
-        } else if (tile.id === self.tilesEnum.PlusForever) {
+        } else if (tile === self.tilesEnum.PlusForever) {
           self.plus_ones_queued = self.control_lemming;
           self.playSoundAt('coin_pickup', block.times(tile_size));
         }
       }
 
       // land mine
-      if (tile.mine) {
+      if (tileMine(tile)) {
         if (obj === char) {
           self.explode_queued = true;
         } else {
@@ -1253,7 +1253,7 @@ function doItemPickups(self, obj, tiles_at_feet, char, corner_foot_block,
 
   // spikes
   var anyIsSpike = tiles_at_feet.some(function(tile) {
-    return tile.spike;
+    return tileSpike(tile);
   });
   if (anyIsSpike) {
     if (obj === char) {
@@ -1299,7 +1299,7 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
     obj.on_ladder = false;
   }
   var ladder_at_feet = self.getTile(corner_foot_block, 1);
-  if (obj.on_ladder && !ladder_at_feet.ladder) {
+  if (obj.on_ladder && !tileLadder(ladder_at_feet)) {
     obj.on_ladder = false;
   }
   if (move_left && !move_right) {
@@ -1350,11 +1350,11 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
   var ladder_velocity = 200;
   var new_pos;
   var new_pos_grid;
-  if (move_up && ladder_at_feet.ladder) {
+  if (move_up && tileLadder(ladder_at_feet)) {
     new_pos = new Vec2d(obj.pos.x, obj.pos.y + ladder_velocity * dt);
     new_pos_grid = new_pos.divBy(tile_size).floor();
 
-    if (! self.getTile(new_pos_grid, 1).ladder) {
+    if (! tileLadder(self.getTile(new_pos_grid, 1))) {
       obj.pos.y = new_pos_grid.y * self.level.tileHeight;
       obj.on_ladder = false;
     } else {
@@ -1372,12 +1372,12 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
         self.setRunningSound(self.ladder_audio);
       }
     }
-  } else if (move_down && ladder_at_feet.ladder) {
+  } else if (move_down && tileLadder(ladder_at_feet)) {
     new_pos = new Vec2d(obj.pos.x, obj.pos.y - ladder_velocity * dt);
     new_pos_grid = new_pos.divBy(tile_size).floor();
 
     if (self.getBlockIsSolid(new_pos_grid) &&
-        !self.getTile(new_pos_grid, 1).ladder)
+        !tileLadder(self.getTile(new_pos_grid, 1)))
     {
       obj.pos.y = (new_pos_grid.y + 1) * self.level.tileHeight;
       obj.on_ladder = false;
@@ -1481,9 +1481,9 @@ function resolve_y(self, obj, new_pos, vel, obj_size) {
   var tile_there = self.getTile(new_feet_block);
 
   // ramps
-  if (tile_there.ramp === -1) {
+  if (tileRamp(tile_there) === -1) {
     new_pos.y = new_feet_block.y * self.level.tileHeight + self.level.tileHeight;
-  } else if (self.getTile(new Vec2d(new_feet_block.x+1, new_feet_block.y)).ramp === 1) {
+  } else if (tileRamp(self.getTile(new Vec2d(new_feet_block.x+1, new_feet_block.y))) === 1) {
     new_pos.y = new_feet_block.y * self.level.tileHeight + self.level.tileHeight;
   }
 
@@ -1579,7 +1579,7 @@ LevelPlayer.prototype.getTile = function(block_pos, layer_index) {
 
 LevelPlayer.prototype.getBlockIsSolid = function(block_pos) {
   var tile_there = this.getTile(block_pos);
-  if (tile_there.solid) return true;
+  if (tileSolid(tile_there)) return true;
 
   // check if there is an object filling this role
   for (var i = 0; i < this.platform_objects.length; i += 1) {
@@ -1592,11 +1592,12 @@ LevelPlayer.prototype.getBlockIsSolid = function(block_pos) {
 // TODO: do we need to delete the old sprite?
 LevelPlayer.prototype.setTile = function(block_pos, tile) {
   debugger; // make sure this method does the right thing
-  this.level.layers[0].setTileAt(block_pos.x, block_pos.y, tile);
+  var unfuckedY = this.level.height - block_pos.y - 1;
+  this.level.layers[0].setTileAt(block_pos.x, unfuckedY, tile);
   var new_sprite = null;
   if (tile != null) {
     new_sprite = new chem.Sprite(tile.animation, {
-      pos: new Vec2d(this.level.tileWidth * block_pos.x, this.level.tileHeight * block_pos.y),
+      pos: new Vec2d(this.level.tileWidth * block_pos.x, this.level.tileHeight * unfuckedY),
       batch: this.batch_level,
       zOrder: this.layer_group[0],
     });
@@ -1990,3 +1991,31 @@ LevelPlayer.prototype.spawnGoreExplosion = function(pos, vel, size) {
     this.physical_objects.push(obj);
   }
 };
+
+function tileBreakable(tile) {
+  return tile && !!tile.properties.breakable;
+}
+
+function tileBelt(tile) {
+  return (tile && tile.properties.belt) ? parseInt(tile.properties.belt, 10) : null;
+}
+
+function tileMine(tile) {
+  return tile && !!tile.properties.mine;
+}
+
+function tileSpike(tile) {
+  return tile && !!tile.properties.spike;
+}
+
+function tileLadder(tile) {
+  return tile && !!tile.properties.ladder;
+}
+
+function tileRamp(tile) {
+  return (tile && tile.properties.ramp) ? parseInt(tile.properties.ramp, 10) : null;
+}
+
+function tileSolid(tile) {
+  return tile && !!tile.properties.solid;
+}
