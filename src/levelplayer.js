@@ -1055,8 +1055,8 @@ LevelPlayer.prototype.update = function(dt, dx) {
     if (lemming.frame.new_image != null) {
       lemming.sprite.setAnimation(lemming.frame.new_image)
     }
-    lemming.sprite.pos = lemming.frame.pos.plus(lemming.sprite.animation.offset);
-    lemming.sprite.pos.y = self.level.height * self.level.tileHeight - lemming.sprite.pos.y;
+    lemming.sprite.pos.x = lemming.frame.pos.x;
+    lemming.sprite.pos.y = self.level.height * self.level.tileHeight - lemming.frame.pos.y;
   }
 
   function prepareObjSprite(obj) {
