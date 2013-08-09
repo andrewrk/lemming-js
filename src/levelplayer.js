@@ -954,6 +954,8 @@ LevelPlayer.prototype.update = function(dt, dx) {
       if (self.held_by != null) {
         var explosion_pos = self.held_by.pos.plus(self.held_by.size.scaled(0.5).times(tile_size));
         self.handleExplosion(explosion_pos, self.held_by.vel, true);
+        self.held_by.delete();
+        self.held_by = null;
       } else {
         old_head_lemming = self.lemmings[self.control_lemming];
         self.handleExplosion(old_head_lemming.frame.pos.offset(0, 2), old_head_lemming.frame.vel, true);
