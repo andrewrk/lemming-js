@@ -381,8 +381,8 @@ ConveyorBelt.prototype.toggle = function() {
 
 ConveyorBelt.prototype.setCorrectPosition = function() {
   var unfuckedY = this.game.level.height - this.pos.y - 1;
-  this.sprite.pos.x = this.pos.x * tile_size;
-  this.sprite.pos.y = unfuckedY * tile_size;
+  this.sprite.pos.x = this.pos.x * tile_size.x;
+  this.sprite.pos.y = unfuckedY * tile_size.y;
 };
 
 function Bridge(pos, size, state, up_sprite, down_sprite) {

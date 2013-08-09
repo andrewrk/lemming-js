@@ -125,11 +125,11 @@ exports.spritesheet = {
     },
     belt_on: {
       delay: 0.05,
-      anchor: 'bottomleft',
+      anchor: 'topleft',
       frames: 'belt',
     },
     belt_off: {
-      anchor: 'bottomleft',
+      anchor: 'topleft',
       frames: ['belt/01.png'],
     },
     tank_point: {
@@ -146,7 +146,7 @@ exports.spritesheet = {
       ],
     },
     gear_turning: {
-      anchor: 'bottomleft',
+      anchor: 'topleft',
       frames: [
         'gear/01.png',
         'gear/02.png',
@@ -155,7 +155,7 @@ exports.spritesheet = {
       ],
     },
     gear_bloody: {
-      anchor: 'bottomleft',
+      anchor: 'topleft',
       frames: ['gear/05.png'],
     },
     'title/bg': {
