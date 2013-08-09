@@ -177,7 +177,9 @@ exports.spritesheet = {
       anchor: 'bottomleft',
     },
     'bullet': {},
-    'bomb': {},
+    'bomb': {
+      anchor: 'bottom'
+    },
     'gore1': {},
     'gore2': {},
     'gore3': {},
