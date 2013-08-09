@@ -618,7 +618,7 @@ LevelPlayer.prototype.setRunningSound = function(source) {
 LevelPlayer.prototype.loadImages = function() {
   // TODO: generate the minus animations?
 
-  this.img_hud = chem.resources.images['hud.png'];
+  this.img_hud = chem.Animation.fromImage(chem.resources.images['hud.png']);
   this.img_gore = [
     ani.gore1,
     ani.gore2,
@@ -628,8 +628,10 @@ LevelPlayer.prototype.loadImages = function() {
   var name;
   if (this.level.properties.bg_art) {
     name = this.level.properties.bg_art;
-    this.sprite_bg_left = new chem.Sprite(ani[name], { batch: this.batch_bg2 });
-    this.sprite_bg_right = new chem.Sprite(ani[name], { batch: this.batch_bg2});
+    this.sprite_bg_left = new chem.Sprite(
+        chem.Animation.fromImage(chem.resources.images[name]), { batch: this.batch_bg2 });
+    this.sprite_bg_right = new chem.Sprite(
+        chem.Animation.fromImage(chem.resources.images[name]), { batch: this.batch_bg2});
     this.sprite_bg_left.pos = new Vec2d(0, 0);
     this.sprite_bg_right.pos = new Vec2d(this.sprite_bg_left.size.x, 0);
   } else {
@@ -640,8 +642,10 @@ LevelPlayer.prototype.loadImages = function() {
 
   if (this.level.properties.fg_art) {
     name = this.level.properties.fg_art;
-    this.sprite_bg2_left = new chem.Sprite(ani[name], {batch: this.batch_bg1});
-    this.sprite_bg2_right = new chem.Sprite(ani[name], {batch: this.batch_bg1});
+    this.sprite_bg2_left = new chem.Sprite(
+        chem.Animation.fromImage(chem.resources.images[name], {batch: this.batch_bg1}));
+    this.sprite_bg2_right = new chem.Sprite(
+        chem.Animation.fromImage(chem.resources.images[name], {batch: this.batch_bg1}));
     this.sprite_bg2_left.pos = new Vec2d(0, 0);
     this.sprite_bg2_right.pos = new Vec2d(this.sprite_bg2_left.size.x, 0);
   } else {
@@ -765,7 +769,7 @@ LevelPlayer.prototype.afterLoad = function() {
 
   this.sfx.level_start.play();
 
-  this.sprite_hud = new chem.Sprite(ani.hud, {
+  this.sprite_hud = new chem.Sprite(this.img_hud, {
     batch: this.batch_static,
     pos: new Vec2d(0, 0),
   });
@@ -1202,7 +1206,7 @@ LevelPlayer.prototype.update = function(dt, dx) {
 function doItemPickups(self, obj, tiles_at_feet, char, corner_foot_block,
     blocks_at_feet)
 {
-  var corner_block = obj.pos.divBy(tile_size).apply(Math.Round).floor();
+  var corner_block = obj.pos.divBy(tile_size).apply(Math.round).floor();
   var feet_block = obj.pos.plus(tile_size.scaled(0.5)).divBy(tile_size).apply(Math.round).floor();
   var it = new Vec2d(0, 0);
   for (it.y = 0; it.y < obj.size.y; it.y += 1) {
@@ -1567,8 +1571,10 @@ LevelPlayer.prototype.blockAt = function(abs_pt) {
 };
 
 LevelPlayer.prototype.getTile = function(block_pos, layer_index) {
-  debugger; // make sure that crazy lookup will work
-  return this.level.layers[layer_index].tileAt(block_pos.x, block_pos.y);
+  // this function must unfuck the y coordinate
+  layer_index = layer_index == null ? 0 : layer_index;
+  var unfuckedY = this.level.height - block_pos.y - 1;
+  return this.level.layers[layer_index].tileAt(block_pos.x, unfuckedY);
 };
 
 LevelPlayer.prototype.getBlockIsSolid = function(block_pos) {
@@ -1589,7 +1595,7 @@ LevelPlayer.prototype.setTile = function(block_pos, tile) {
   this.level.layers[0].setTileAt(block_pos.x, block_pos.y, tile);
   var new_sprite = null;
   if (tile != null) {
-    new_sprite = new chem.Sprite(this.tileAnims[tile.id], {
+    new_sprite = new chem.Sprite(tile.animation, {
       pos: new Vec2d(this.level.tileWidth * block_pos.x, this.level.tileHeight * block_pos.y),
       batch: this.batch_level,
       zOrder: this.layer_group[0],
@@ -1630,9 +1636,6 @@ LevelPlayer.prototype.load = function(cb) {
     self.tilesEnum = {Air: null};
     tiles.forEach(function(tile) {
       if (tile.properties.name) self.tilesEnum[tile.properties.name] = tile;
-    });
-    self.tileAnims = tiles.map(function(tile) {
-      return chem.Animation.fromImage(tile.image);
     });
 
     // load tiles into sprites
@@ -1697,7 +1700,7 @@ LevelPlayer.prototype.load = function(cb) {
     }
 
     self.labels = [];
-    self.obj_sprites = {};
+    self.obj_sprites = [];
 
     self.level.layers.forEach(function(layer) {
       if (layer.type !== 'object') return;
