@@ -275,7 +275,7 @@ Bullet.prototype.think = function(dt) {
   var unit_vector_vel = this.vel.normalized();
   var last_one = false;
   while (! last_one) {
-    vector_it.add(unit_vector_vel.scaled(tile_size));
+    vector_it.add(unit_vector_vel.divBy(tile_size));
     // if we hit something solid, die
     if (old_prev_pos.distanceSqrd(this.pos) < old_prev_pos.distanceSqrd(vector_it)) {
       last_one = true;
@@ -1052,7 +1052,6 @@ LevelPlayer.prototype.update = function(dt, dx) {
   for (i = self.control_lemming; i < self.lemmings.length; i += 1) {
     lemming = self.lemmings[i];
     if (lemming.frame.new_image != null) {
-      debugger; // is this right?
       lemming.sprite.setAnimation(lemming.frame.new_image)
     }
     lemming.sprite.pos = lemming.frame.pos.plus(lemming.sprite.animation.offset);
@@ -1092,7 +1091,8 @@ LevelPlayer.prototype.update = function(dt, dx) {
       var unit_vector_vel = obj.vel.normalized();
       var last_one = false;
       while (! last_one) {
-        vector_it.add(unit_vector_vel.scaled(tile_size));
+        vector_it.add(unit_vector_vel.divBy(tile_size));
+        if (isNaN(vector_it.x) || isNaN(vector_it.y)) debugger
         if (obj.pos.distanceSqrd(new_pos) < obj.pos.distanceSqrd(vector_it)) {
           last_one = true;
           vector_it = new_pos;
@@ -1345,7 +1345,6 @@ function applyInputToPhysics(self, obj, corner_foot_block, on_ground, dt) {
     // switch sprite to still
     if (obj.sprite.animation !== ani.lem_crazy) {
       obj.sprite.setAnimation(ani.lem_crazy);
-      debugger; // TODO new_image wtf? sprite.image wtf?
       obj.frame.new_image = obj.sprite.animation;
 
       self.setRunningSound(null);
@@ -1595,7 +1594,6 @@ LevelPlayer.prototype.getBlockIsSolid = function(block_pos) {
 
 // TODO: do we need to delete the old sprite?
 LevelPlayer.prototype.setTile = function(block_pos, tile) {
-  debugger; // make sure this method does the right thing
   var unfuckedY = this.level.height - block_pos.y - 1;
   this.level.layers[0].setTileAt(block_pos.x, unfuckedY, tile);
   var new_sprite = null;
@@ -1919,7 +1917,8 @@ LevelPlayer.prototype.load = function(cb) {
     if (bg_music_src) {
       self.bg_music = new Audio(bg_music_src);
       self.bg_music.loop = true;
-      self.bg_music.play();
+      // TODO uncomment this
+      //self.bg_music.play();
     }
 
     cb();
@@ -1963,7 +1962,6 @@ LevelPlayer.prototype.spawnBomb = function(pos, vel, fuse) {
 LevelPlayer.prototype.playSoundAt = function(sfx_name, pos) {
   var audio = this.sfx[sfx_name].play();
   var zero_volume_distance_sqrd = 640000;
-  debugger; // double check dat math
   audio.volume = 1 - pos.distanceSqrd(this.scroll.plus(this.game.engine.size.scaled(0.5))) / zero_volume_distance_sqrd;
   return audio;
 };
