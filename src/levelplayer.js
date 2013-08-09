@@ -100,6 +100,7 @@ function Tank(pos, size, sprite, game, dir_lock) {
   this.shoot_delay = 2;
   this.dir_lock = !!dir_lock;
 }
+util.inherits(Tank, PhysicsObject);
 
 Tank.prototype.think = function(dt) {
   if (this.game.control_lemming >= this.game.lemmings.length) return;
@@ -542,6 +543,11 @@ BombSpawner.prototype.toggle = function() {
 };
 
 BombSpawner.prototype.spawn = function() {
+  if (this.game.physical_objects == null) {
+    clearInterval(this.interval);
+    return;
+  }
+
   // pick a random location within my size
   var pos = this.pos.offset(Math.random() * this.size.x, Math.random() * this.size.y);
 

@@ -25,14 +25,6 @@
     <property name="state" value="open"/>
    </properties>
   </object>
-  <object type="Button" gid="14" x="240" y="1056">
-   <properties>
-    <property name="button_id" value="bombs"/>
-    <property name="delay" value="2"/>
-    <property name="down_img" value="button_down.png"/>
-    <property name="up_img" value="button_up.png"/>
-   </properties>
-  </object>
   <object name="gear" type="GearButton" x="1904" y="720" width="48" height="48">
    <properties>
     <property name="button_id" value="bombs"/>
@@ -49,7 +41,7 @@
     <property name="type" value="monster"/>
    </properties>
   </object>
-  <object name="sign" type="Decoration" x="2944" y="1712" width="80" height="32">
+  <object name="sign" type="Decoration" x="2944" y="1696" width="80" height="48">
    <properties>
     <property name="img" value="winnar.png"/>
    </properties>
@@ -304,11 +296,6 @@
     <property name="state" value="off"/>
    </properties>
   </object>
-  <object type="Button" gid="14" x="1504" y="1040">
-   <properties>
-    <property name="button_id" value="helper"/>
-   </properties>
-  </object>
   <object name="trap door" type="TrapDoor" x="208" y="688" width="64" height="16">
    <properties>
     <property name="button_id" value="bombs"/>
@@ -389,12 +376,23 @@
     <property name="state" value="off"/>
    </properties>
   </object>
-  <object type="Button" gid="14" x="2192" y="1056">
+  <object type="Button" x="240" y="1040" width="16" height="16">
+   <properties>
+    <property name="button_id" value="bombs"/>
+    <property name="delay" value="2"/>
+   </properties>
+  </object>
+  <object type="Button" x="1504" y="1024" width="16" height="16">
+   <properties>
+    <property name="button_id" value="helper"/>
+   </properties>
+  </object>
+  <object type="Button" x="2192" y="1040" width="16" height="16">
    <properties>
     <property name="button_id" value="bomb_room"/>
     <property name="delay" value="2"/>
    </properties>
   </object>
  </objectgroup>
- <objectgroup name="PlayerLayer" width="200" height="160" visible="0"/>
+ <objectgroup name="PlayerLayer" width="200" height="160"/>
 </map>

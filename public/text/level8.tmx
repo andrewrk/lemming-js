@@ -18,22 +18,11 @@
  </layer>
  <objectgroup name="Object Layer 1" width="200" height="100">
   <object name="start" type="StartPoint" x="464" y="576" width="32" height="64"/>
-  <object name="gun man" type="Agent" x="1319" y="558" width="32" height="64">
-   <properties>
-    <property name="type" value="gunner"/>
-   </properties>
-  </object>
   <object name="trap door" type="TrapDoor" x="1360" y="639" width="64" height="16">
    <properties>
     <property name="button_id" value="onwards"/>
     <property name="img" value="factory_door.png"/>
     <property name="state" value="closed"/>
-   </properties>
-  </object>
-  <object type="Button" gid="14" x="160" y="639">
-   <properties>
-    <property name="button_id" value="bridge"/>
-    <property name="delay" value="2"/>
    </properties>
   </object>
   <object name="bomb spawner" type="BombSpawner" x="272" y="342" width="80" height="24">
@@ -59,7 +48,7 @@
     <property name="type" value="monster"/>
    </properties>
   </object>
-  <object name="sign" type="Decoration" x="464" y="1232" width="80" height="32">
+  <object name="sign" type="Decoration" x="464" y="1216" width="80" height="48">
    <properties>
     <property name="img" value="winnar.png"/>
    </properties>
@@ -131,27 +120,22 @@
     <property name="direction" value="-1"/>
    </properties>
   </object>
-  <object name="gun man" type="Agent" x="1195" y="322" width="32" height="64">
+  <object name="gun man" type="Agent" x="1325" y="307" width="32" height="64">
    <properties>
     <property name="type" value="gunner"/>
    </properties>
   </object>
-  <object name="gun man" type="Agent" x="1044" y="59" width="32" height="64">
+  <object name="gun man" type="Agent" x="1215" y="136" width="32" height="64">
    <properties>
     <property name="type" value="gunner"/>
    </properties>
   </object>
-  <object name="gun man" type="Agent" x="1263" y="386" width="32" height="64">
+  <object name="gun man" type="Agent" x="1271" y="214" width="32" height="64">
    <properties>
     <property name="type" value="gunner"/>
    </properties>
   </object>
-  <object name="gun man" type="Agent" x="1138" y="187" width="32" height="64">
-   <properties>
-    <property name="type" value="gunner"/>
-   </properties>
-  </object>
-  <object name="gun man" type="Agent" x="929" y="48" width="32" height="64">
+  <object name="gun man" type="Agent" x="1146" y="65" width="32" height="64">
    <properties>
     <property name="type" value="gunner"/>
    </properties>
@@ -160,12 +144,6 @@
    <properties>
     <property name="button_id" value="bridge"/>
     <property name="state" value="down"/>
-   </properties>
-  </object>
-  <object type="Button" gid="14" x="16" y="639">
-   <properties>
-    <property name="button_id" value="reward"/>
-    <property name="delay" value="2"/>
    </properties>
   </object>
   <object name="bridge" type="Bridge" x="320" y="768" width="96" height="96">
@@ -179,23 +157,11 @@
     <property name="button_id" value="belt"/>
    </properties>
   </object>
-  <object type="Button" gid="14" x="16" y="848">
-   <properties>
-    <property name="button_id" value="onwards"/>
-    <property name="delay" value="2"/>
-   </properties>
-  </object>
   <object name="trap door" type="TrapDoor" x="192" y="207" width="64" height="16">
    <properties>
     <property name="button_id" value="onwards"/>
     <property name="img" value="factory_door.png"/>
     <property name="state" value="closed"/>
-   </properties>
-  </object>
-  <object type="Button" gid="14" x="896" y="736">
-   <properties>
-    <property name="button_id" value="belt2"/>
-    <property name="delay" value="2"/>
    </properties>
   </object>
   <object name="tank" type="Agent" x="656" y="752" width="64" height="48">
@@ -265,6 +231,30 @@
     <property name="type" value="gunner"/>
    </properties>
   </object>
+  <object type="Button" x="16" y="624" width="16" height="16">
+   <properties>
+    <property name="button_id" value="reward"/>
+    <property name="delay" value="2"/>
+   </properties>
+  </object>
+  <object type="Button" x="160" y="624" width="16" height="16">
+   <properties>
+    <property name="button_id" value="bridge"/>
+    <property name="delay" value="2"/>
+   </properties>
+  </object>
+  <object type="Button" x="16" y="832" width="16" height="16">
+   <properties>
+    <property name="button_id" value="onwards"/>
+    <property name="delay" value="2"/>
+   </properties>
+  </object>
+  <object type="Button" x="896" y="720" width="16" height="16">
+   <properties>
+    <property name="button_id" value="belt2"/>
+    <property name="delay" value="2"/>
+   </properties>
+  </object>
  </objectgroup>
- <objectgroup name="PlayerLayer" width="200" height="100" visible="0"/>
+ <objectgroup name="PlayerLayer" width="200" height="100"/>
 </map>
