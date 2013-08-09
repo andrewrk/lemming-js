@@ -821,12 +821,12 @@ LevelPlayer.prototype.detachHeadLemming = function() {
 };
 
 LevelPlayer.prototype.handleExplosion = function(pos, vel, caused_by_self) {
+  var self = this;
   this.playSoundAt('blast', pos);
   var sprite = new chem.Sprite(ani.explosion, {
     batch: this.batch_level,
     zOrder: this.group_fg,
   });
-  debugger; // check if animations.explosion.duration worked below
   this.physical_objects.push(new PhysicsObject(pos, vel, sprite, new Vec2d(1, 1),
         chem.resources.animations.explosion.duration));
   var explosion_power = 4;
@@ -850,7 +850,6 @@ LevelPlayer.prototype.handleExplosion = function(pos, vel, caused_by_self) {
   if (this.control_lemming < this.lemmings.length && ! caused_by_self) {
     blowUpObj(this.lemmings[this.control_lemming]);
   }
-  var self = this;
   function blowUpObj(obj) {
     if (obj.gone) return;
     var obj_center = obj.size.times(tile_size).scale(0.5).plus(obj.pos);
@@ -1082,7 +1081,6 @@ LevelPlayer.prototype.update = function(dt, dx) {
       var last_one = false;
       while (! last_one) {
         vector_it.add(unit_vector_vel.divBy(tile_size));
-        if (isNaN(vector_it.x) || isNaN(vector_it.y)) debugger
         if (obj.pos.distanceSqrd(new_pos) < obj.pos.distanceSqrd(vector_it)) {
           last_one = true;
           vector_it = new_pos;
@@ -1274,7 +1272,7 @@ function doItemPickups(self, obj, tiles_at_feet, char, corner_foot_block,
       });
       var new_obj = new PhysicsObject(obj.pos, new Vec2d(0, 0), sprite,
           obj.size, chem.resources.animations.lem_die.duration);
-      self.physical_objects.append(new_obj);
+      self.physical_objects.push(new_obj);
     }
     self.playSoundAt('spike_death', corner_foot_block.times(tile_size));
     self.spawnGoreExplosion(obj.pos, obj.vel, obj.size);
