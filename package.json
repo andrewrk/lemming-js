@@ -1,5 +1,5 @@
 {
-  "name": "lemming-js",
+  "name": "lemming-game",
   "version": "0.0.0",
   "description": "game prototype using chem game engine",
   "scripts": {
