@@ -12,11 +12,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/superjoe30/lemming-js.git"
+    "url": "git://github.com/andrewrk/lemming-js.git"
   },
   "author": "Andrew Kelley <superjoe30@gmail.com>",
   "license": "BSD",
   "bugs": {
-    "url": "https://github.com/superjoe30/lemming-js/issues"
+    "url": "https://github.com/andrewrk/lemming-js/issues"
   }
 }
